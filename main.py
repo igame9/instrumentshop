@@ -66,49 +66,73 @@ def notebook(window):
     widgets(frame1)
 
 
-def takeid(id, out):
+def takeid(id, out1, out2, out3, out4):
     name = DBManage.selectClientName(id)
     if name == 0:
         name = ""
     if name == "" or name == []:
-        name = "Отсутствует данная запись в БД"
-    out.configure(text=name)
+        out1.configure(text="Данные не найдены")
+        return False
+    out1.configure(text=name[0])
+    out2.configure(text=name[1])
+    out3.configure(text=name[2])
+    out4.configure(text=name[3])
 
 
-def addClient(name, family, outchange1, outchange2):
-    if name == '' or family == '':
+def addClient(name, family, telephone, email, outchange1, outchange2, outchange3, outchange4):
+    if name == '' or family == '' or telephone == '' or email == '':
         tkinter.messagebox.showwarning(title="Внимание", message="Нельзя добавить пустого сотрудника")
         return False
-    DBManage.clientAdd(name, family)
+    DBManage.clientAdd(name, family, telephone, email)
     outchange1.delete(0, END)
     outchange2.delete(0, END)
+    outchange3.delete(0, END)
+    outchange4.delete(0, END)
     return True
 
 
 def widgets(frame1):
     button1 = Button(frame1, text='Получить клиента по id', width=18, height=1, fg='black',
-                     command=lambda: takeid(entry1.get(), label1))
-    label1 = Label(frame1, width=50, height=10)
+                     command=lambda: takeid(entry1.get(), label1, label7, label8, label9))
+    label1 = Label(frame1, width=30, height=1)
     entry1 = Entry(frame1, width=5)
     label2 = Label(frame1, width=30, height=1, text="Введите id клиента для поиска")
     sep1 = ttk.Separator(frame1, orient="vertical")
     entry2 = Entry(frame1, width=60)
     entry3 = Entry(frame1, width=60)
+    entry4 = Entry(frame1, width=60)
+    entry5 = Entry(frame1, width=60)
+    # .....
     button2 = Button(frame1, text='Добавить нового клиента', width=23, height=1,
-                     command=lambda: addClient(entry2.get(), entry3.get(), entry2, entry3))
+                     command=lambda: addClient(entry2.get(), entry3.get(), entry4.get(), entry5.get(), entry2, entry3,
+                                               entry4, entry5))
     label3 = Label(frame1, width=5, height=1, text="Имя", bg="gray22")
     label4 = Label(frame1, width=7, height=1, text="Фамилия", bg="gray22")
+    label5 = Label(frame1, width=7, height=1, text="Телефон", bg="gray22")
+    label6 = Label(frame1, width=7, height=1, text="E-Mail", bg="gray22")
+    label7 = Label(frame1, width=30, height=1)
+    label8 = Label(frame1, width=30, height=1)
+    label9 = Label(frame1, width=30, height=1)
+
+    # .....
     # Упаковка виджетов
     entry1.place(x=35, y=630)
     button1.place(x=100, y=630)
-    label1.place(x=35, y=470)
-    label2.place(x=110, y=470)
+    label1.place(x=35, y=500)
+    label7.place(x=35, y=530)
+    label8.place(x=35, y=560)
+    label9.place(x=35, y=590)
+    label2.place(x=35, y=470)
     sep1.place(x=0, y=460, relwidth=1)
     entry2.place(x=500, y=470)
     entry3.place(x=500, y=500)
+    entry4.place(x=500, y=530)
+    entry5.place(x=500, y=560)
     button2.place(x=500, y=630)
     label3.place(x=450, y=470)
     label4.place(x=440, y=500)
+    label5.place(x=440, y=530)
+    label6.place(x=440, y=560)
 
 
 def showWindow():

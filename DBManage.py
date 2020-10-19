@@ -14,8 +14,12 @@ def selectClientName(id):  # функция достать клиента по i
         for data in data:
             name = data[0]
             family = data[1]
+            telephone = data[2]
+            email = data[3]
             client.append(name)
             client.append(family)
+            client.append(telephone)
+            client.append(email)
         cursor.close()
         conn.close()
     except (psycopg2.OperationalError, psycopg2.errors.InvalidTextRepresentation):
@@ -49,12 +53,13 @@ def testConn():
     return True
 
 
-def clientAdd(name, family):
+def clientAdd(name, family, telephone, email):
     try:
         conn = psycopg2.connect(dbname='InstrumentalMusic', user='andrey',
                                 password='98106547', host='192.168.56.101', port='5432')
         cursor = conn.cursor()
-        cursor.callproc('clientadd', [name, family])  # пример вызова функции из БД , имя и параметр на вход
+        cursor.callproc('clientadd',
+                        [name, family, telephone, email])  # пример вызова функции из БД , имя и параметр на вход
         cursor.close()
         conn.commit()
         conn.close()
