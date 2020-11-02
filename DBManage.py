@@ -1,15 +1,17 @@
-import sys
 import psycopg2
 import tkinter.messagebox
 
+loginUser = ''  # тут хранится логин пользователя, получаемый из функции main.auth()
 
-def selectClientName(id):  # функция достать клиента по id из БД - вызывает функцию selers
+
+def selectClientName(id):  # функция достать клиента по id из БД - вызывает функцию getClient
     client = []
+    userRole = getRole(loginUser)
     try:
-        conn = psycopg2.connect(dbname='InstrumentalMusic', user='andrey',
-                                password='98106547', host='192.168.56.101', port='5432')
+        conn = psycopg2.connect(dbname='InstrumentalMusic', user=userRole,
+                                password='9810', host='192.168.56.101', port='5432')
         cursor = conn.cursor()
-        cursor.callproc('selers', [id])  # пример вызова функции из БД , имя и параметр на вход
+        cursor.callproc('getclient', [id])  # пример вызова функции из БД , имя и параметр на вход
         data = cursor.fetchall()  # возвращает список всех строк, полученных из запроса
         for data in data:
             name = data[0]
@@ -54,9 +56,10 @@ def testConn():
 
 
 def clientAdd(name, family, telephone, email):
+    userRole = getRole(loginUser)
     try:
-        conn = psycopg2.connect(dbname='InstrumentalMusic', user='andrey',
-                                password='98106547', host='192.168.56.101', port='5432')
+        conn = psycopg2.connect(dbname='InstrumentalMusic', user=userRole,
+                                password='9810', host='192.168.56.101', port='5432')
         cursor = conn.cursor()
         cursor.callproc('clientadd',
                         [name, family, telephone, email])  # пример вызова функции из БД , имя и параметр на вход
@@ -68,36 +71,6 @@ def clientAdd(name, family, telephone, email):
         return False
     tkinter.messagebox.showinfo(title="Успех", message=" Клиент успешно добавлен в базу")
     return True
-
-
-def addQuery():
-    try:
-        conn = psycopg2.connect(dbname='InstrumentalMusic', user='andrey',
-                                password='98106547', host='192.168.56.101', port='5432')
-        cursor = conn.cursor()
-        cursor.execute("INSERT INTO client (name,family) VALUES ('Niko','Two')")
-        cursor.close()
-        conn.commit()
-        conn.close()
-    except (psycopg2.OperationalError, psycopg2.errors.InvalidTextRepresentation):
-        tkinter.messagebox.showerror(title="Ошибка", message="Ошибка подключения к БД")
-        return False
-    tkinter.messagebox.showinfo(title="Успех", message="Успешное добавление нового пользователя")
-
-
-def deleteQuery(id):
-    try:
-        conn = psycopg2.connect(dbname='InstrumentalMusic', user='andrey',
-                                password='98106547', host='192.168.56.101', port='5432')
-        cursor = conn.cursor()
-        cursor.execute("DELETE from client where idclient = " + str(id))
-        cursor.close()
-        conn.commit()
-        conn.close()
-    except (psycopg2.OperationalError, psycopg2.errors.InvalidTextRepresentation):
-        tkinter.messagebox.showerror(title="Ошибка", message="Ошибка подключения к БД")
-        return False
-    tkinter.messagebox.showinfo(title="Успех", message="Успешное удаление данных")
 
 
 def checkUser(name, family):
@@ -113,6 +86,38 @@ def checkUser(name, family):
         conn.commit()
         conn.close()
         return flag
+    except (psycopg2.OperationalError, psycopg2.errors.InvalidTextRepresentation):
+        tkinter.messagebox.showerror(title="Ошибка", message="Ошибка подключения к БД")
+        return False
+
+
+def getRole(login):
+    try:
+        conn = psycopg2.connect(dbname='InstrumentalMusic', user='andrey',
+                                password='98106547', host='192.168.56.101', port='5432')
+        cursor = conn.cursor()
+        cursor.callproc('getrole', [login])  # пример вызова функции из БД , имя и параметр на вход
+        role = cursor.fetchall()
+        for data in role:
+            namerole = data[0]
+        conn.commit()
+        conn.close()
+        return str(namerole)
+    except (psycopg2.OperationalError, psycopg2.errors.InvalidTextRepresentation):
+        tkinter.messagebox.showerror(title="Ошибка", message="Ошибка подключения к БД")
+        return False
+
+
+def deleteClient(id):
+    userRole = getRole(loginUser)
+    try:
+        conn = psycopg2.connect(dbname='InstrumentalMusic', user=userRole,
+                                password='9810', host='192.168.56.101', port='5432')
+        cursor = conn.cursor()
+        cursor.callproc('deleteclient', [id])  # пример вызова функции из БД , имя и параметр на вход
+        cursor.close()
+        conn.commit()
+        conn.close()
     except (psycopg2.OperationalError, psycopg2.errors.InvalidTextRepresentation):
         tkinter.messagebox.showerror(title="Ошибка", message="Ошибка подключения к БД")
         return False

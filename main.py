@@ -5,13 +5,14 @@ import DBManage
 
 
 def auth(login, password, window, extrawindow):
-    if DBManage.checkUser(login, password) == 1:
+    if DBManage.checkUser(login, password) == 1 and DBManage.getRole(login) != "None":
         tkinter.messagebox.showinfo(title="Успех", message="Вы успешно активировались")
+        DBManage.loginUser = login  # передача логина в DBManage
         window.deiconify()
         extrawindow.destroy()
         return True
     else:
-        tkinter.messagebox.showerror(title="Ошибка", message="Неверные логин или пароль")
+        tkinter.messagebox.showerror(title="Ошибка", message="Неверные логин или пароль или ошибка роли")
         return False
 
 
@@ -72,6 +73,9 @@ def takeid(id, out1, out2, out3, out4):
         name = ""
     if name == "" or name == []:
         out1.configure(text="Данные не найдены")
+        out2.configure(text="")
+        out3.configure(text="")
+        out4.configure(text="")
         return False
     out1.configure(text=name[0])
     out2.configure(text=name[1])
@@ -91,6 +95,16 @@ def addClient(name, family, telephone, email, outchange1, outchange2, outchange3
     return True
 
 
+def deleteClient(id,out):
+    if id == '':
+        tkinter.messagebox.showwarning(title="Внимание", message="Нельзя удалить пустого сотрудника")
+        return False
+    else:
+        DBManage.deleteClient(id)
+        out.delete(0, END)
+        tkinter.messagebox.showinfo(title="Успех", message="Клиент успешно удален")
+
+
 def widgets(frame1):
     button1 = Button(frame1, text='Получить клиента по id', width=18, height=1, fg='black',
                      command=lambda: takeid(entry1.get(), label1, label7, label8, label9))
@@ -102,10 +116,12 @@ def widgets(frame1):
     entry3 = Entry(frame1, width=60)
     entry4 = Entry(frame1, width=60)
     entry5 = Entry(frame1, width=60)
+    entry6 = Entry(frame1, width=5)
     # .....
     button2 = Button(frame1, text='Добавить нового клиента', width=23, height=1,
                      command=lambda: addClient(entry2.get(), entry3.get(), entry4.get(), entry5.get(), entry2, entry3,
                                                entry4, entry5))
+    button3 = Button(frame1, text='Удалить клиента', width=18, height=1, command=lambda: deleteClient(entry6.get(),entry6))
     label3 = Label(frame1, width=5, height=1, text="Имя", bg="gray22")
     label4 = Label(frame1, width=7, height=1, text="Фамилия", bg="gray22")
     label5 = Label(frame1, width=7, height=1, text="Телефон", bg="gray22")
@@ -113,6 +129,11 @@ def widgets(frame1):
     label7 = Label(frame1, width=30, height=1)
     label8 = Label(frame1, width=30, height=1)
     label9 = Label(frame1, width=30, height=1)
+    label10 = Label(frame1, width=35, height=1, text="Введите id клиента для его удаления из базы", bg="gray22")
+    # text = Text(frame1, width=35, height=1, bg="gray22")
+    # text.tag_configure('bold', font='Helvetica 12 bold')
+    # text.insert('end', "Введите id клиента для его удаления")
+    # text.place(x=1000, y=470)
 
     # .....
     # Упаковка виджетов
@@ -128,11 +149,14 @@ def widgets(frame1):
     entry3.place(x=500, y=500)
     entry4.place(x=500, y=530)
     entry5.place(x=500, y=560)
+    entry6.place(x=1000, y=500)
     button2.place(x=500, y=630)
+    button3.place(x=1000, y=530)
     label3.place(x=450, y=470)
     label4.place(x=440, y=500)
     label5.place(x=440, y=530)
     label6.place(x=440, y=560)
+    label10.place(x=1000, y=470)
 
 
 def showWindow():
