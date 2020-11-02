@@ -31,21 +31,6 @@ def selectClientName(id):  # функция достать клиента по i
     return client
 
 
-def selectDB():
-    try:
-        conn = psycopg2.connect(dbname='InstrumentalMusic', user='andrey',
-                                password='98106547', host='192.168.56.101', port='5432')
-        cursor = conn.cursor()
-        cursor.execute("select * from client")
-        data = cursor.fetchall()  # возвращает список всех строк, полученных из запроса
-        cursor.close()
-        conn.close()
-    except psycopg2.OperationalError:
-        print("Ошибка подключения к БД")
-    print("Подключение прошло")
-    return data
-
-
 def testConn():
     try:
         conn = psycopg2.connect(dbname='InstrumentalMusic', user='andrey',
@@ -118,6 +103,26 @@ def deleteClient(id):
         cursor.close()
         conn.commit()
         conn.close()
+    except (psycopg2.OperationalError, psycopg2.errors.InvalidTextRepresentation):
+        tkinter.messagebox.showerror(title="Ошибка", message="Ошибка подключения к БД")
+        return False
+
+
+def topCheque():
+    rating = []
+    try:
+        userRole = getRole(loginUser)
+        conn = psycopg2.connect(dbname='InstrumentalMusic', user=userRole,
+                                password='9810', host='192.168.56.101', port='5432')
+        cursor = conn.cursor()
+        cursor.callproc('topcheque', [])  # пример вызова функции из БД , имя и параметр на вход
+        data = cursor.fetchall()
+        for data in data:
+            rating.append(data)
+        cursor.close()
+        conn.commit()
+        conn.close()
+        return rating
     except (psycopg2.OperationalError, psycopg2.errors.InvalidTextRepresentation):
         tkinter.messagebox.showerror(title="Ошибка", message="Ошибка подключения к БД")
         return False

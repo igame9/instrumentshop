@@ -13,6 +13,7 @@ def auth(login, password, window, extrawindow):
         return True
     else:
         tkinter.messagebox.showerror(title="Ошибка", message="Неверные логин или пароль или ошибка роли")
+        print(DBManage.topCheque())
         return False
 
 
@@ -95,7 +96,7 @@ def addClient(name, family, telephone, email, outchange1, outchange2, outchange3
     return True
 
 
-def deleteClient(id,out):
+def deleteClient(id, out):
     if id == '':
         tkinter.messagebox.showwarning(title="Внимание", message="Нельзя удалить пустого сотрудника")
         return False
@@ -105,6 +106,26 @@ def deleteClient(id,out):
         tkinter.messagebox.showinfo(title="Успех", message="Клиент успешно удален")
 
 
+def saveRatingInFile(text):
+    Rating = text.get(1.0, END)
+    fileWriter = open('rating.txt', 'w',encoding='utf-8')
+    fileWriter.write(Rating)
+    fileWriter.close()
+
+
+def ratingcheque(text):
+    try:
+        rating = DBManage.topCheque()
+        for rate in rating:
+            text.insert(END, str(rate).replace('\\xa0', '').replace("(", "").replace(")", "").replace("'", "") + '\n')
+    except TypeError:
+        tkinter.messagebox.showerror(title="Ошибка доступа", message="Невозможно выполнить действие")
+
+
+def clearRating(text):
+    text.delete(1.0, END)
+
+
 def widgets(frame1):
     button1 = Button(frame1, text='Получить клиента по id', width=18, height=1, fg='black',
                      command=lambda: takeid(entry1.get(), label1, label7, label8, label9))
@@ -112,6 +133,7 @@ def widgets(frame1):
     entry1 = Entry(frame1, width=5)
     label2 = Label(frame1, width=30, height=1, text="Введите id клиента для поиска")
     sep1 = ttk.Separator(frame1, orient="vertical")
+    sep2 = ttk.Separator(frame1, orient="vertical")
     entry2 = Entry(frame1, width=60)
     entry3 = Entry(frame1, width=60)
     entry4 = Entry(frame1, width=60)
@@ -121,7 +143,11 @@ def widgets(frame1):
     button2 = Button(frame1, text='Добавить нового клиента', width=23, height=1,
                      command=lambda: addClient(entry2.get(), entry3.get(), entry4.get(), entry5.get(), entry2, entry3,
                                                entry4, entry5))
-    button3 = Button(frame1, text='Удалить клиента', width=18, height=1, command=lambda: deleteClient(entry6.get(),entry6))
+    button3 = Button(frame1, text='Удалить клиента', width=18, height=1,
+                     command=lambda: deleteClient(entry6.get(), entry6))
+    button4 = Button(frame1, text="Рейтинг чеков клиентов", width=18, height=1, command=lambda: ratingcheque(text))
+    button5 = Button(frame1, text="Отчистить поле", width=18, height=1, command=lambda: clearRating(text))
+    button6 = Button(frame1, text="Сохранить данные в файл", width=23, height=1, command=lambda: saveRatingInFile(text))
     label3 = Label(frame1, width=5, height=1, text="Имя", bg="gray22")
     label4 = Label(frame1, width=7, height=1, text="Фамилия", bg="gray22")
     label5 = Label(frame1, width=7, height=1, text="Телефон", bg="gray22")
@@ -130,10 +156,8 @@ def widgets(frame1):
     label8 = Label(frame1, width=30, height=1)
     label9 = Label(frame1, width=30, height=1)
     label10 = Label(frame1, width=35, height=1, text="Введите id клиента для его удаления из базы", bg="gray22")
-    # text = Text(frame1, width=35, height=1, bg="gray22")
-    # text.tag_configure('bold', font='Helvetica 12 bold')
-    # text.insert('end', "Введите id клиента для его удаления")
-    # text.place(x=1000, y=470)
+    text = Text(frame1, width=40, height=10)
+    text.tag_configure('bold', font='Helvetica 12 bold')
 
     # .....
     # Упаковка виджетов
@@ -145,6 +169,7 @@ def widgets(frame1):
     label9.place(x=35, y=590)
     label2.place(x=35, y=470)
     sep1.place(x=0, y=460, relwidth=1)
+    sep2.place(x=0, y=200, relwidth=1)
     entry2.place(x=500, y=470)
     entry3.place(x=500, y=500)
     entry4.place(x=500, y=530)
@@ -157,6 +182,10 @@ def widgets(frame1):
     label5.place(x=440, y=530)
     label6.place(x=440, y=560)
     label10.place(x=1000, y=470)
+    text.place(x=25, y=210)
+    button4.place(x=25, y=380)
+    button5.place(x=25, y=410)
+    button6.place(x=177, y=380)
 
 
 def showWindow():
