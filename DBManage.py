@@ -103,6 +103,7 @@ def deleteClient(id):
         cursor.close()
         conn.commit()
         conn.close()
+        return True
     except (psycopg2.OperationalError, psycopg2.errors.InvalidTextRepresentation):
         tkinter.messagebox.showerror(title="Ошибка", message="Ошибка подключения к БД")
         return False
@@ -126,3 +127,100 @@ def topCheque():
     except (psycopg2.OperationalError, psycopg2.errors.InvalidTextRepresentation):
         tkinter.messagebox.showerror(title="Ошибка", message="Ошибка подключения к БД")
         return False
+
+
+def getListIdClient():
+    ListId = []
+    try:
+        userRole = getRole(loginUser)
+        conn = psycopg2.connect(dbname='InstrumentalMusic', user=userRole,
+                                password='9810', host='192.168.56.101', port='5432')
+        cursor = conn.cursor()
+        cursor.callproc('idfromclient', [])  # пример вызова функции из БД , имя и параметр на вход
+        data = cursor.fetchall()
+        for data in data:
+            ListId.append(data)
+        cursor.close()
+        conn.commit()
+        conn.close()
+        return ListId
+    except (psycopg2.OperationalError, psycopg2.errors.InvalidTextRepresentation):
+        tkinter.messagebox.showerror(title="Ошибка", message="Ошибка подключения к БД")
+        return False
+
+
+def getPianinoFromWarehouse():
+    listPianino = []
+    try:
+        userRole = getRole(loginUser)
+        conn = psycopg2.connect(dbname='InstrumentalMusic', user=userRole,
+                                password='98106547', host='192.168.56.101', port='5432')
+        cursor = conn.cursor()
+        cursor.callproc('getpianofromwarehouse', [])  # пример вызова функции из БД , имя и параметр на вход
+        data = cursor.fetchall()
+        for data in data:
+            listPianino.append(data)
+        cursor.close()
+        conn.commit()
+        conn.close()
+        return listPianino
+    except (psycopg2.OperationalError, psycopg2.errors.InvalidTextRepresentation):
+        tkinter.messagebox.showerror(title="Ошибка", message="Ошибка подключения к БД")
+        return False
+
+
+def getDescriptionPiano(id):
+    try:
+        userRole = getRole(loginUser)
+        conn = psycopg2.connect(dbname='InstrumentalMusic', user=userRole,
+                                password='98106547', host='192.168.56.101', port='5432')
+        cursor = conn.cursor()
+        cursor.callproc('getdescriptionpiano', [id])  # пример вызова функции из БД , имя и параметр на вход
+        data = cursor.fetchall()
+        cursor.close()
+        conn.commit()
+        conn.close()
+        return data
+    except (psycopg2.OperationalError, psycopg2.errors.InvalidTextRepresentation):
+        tkinter.messagebox.showerror(title="Ошибка", message="Ошибка подключения к БД")
+        return False
+
+
+def addDescription(idd, text):
+    userRole = getRole(loginUser)
+    try:
+        conn = psycopg2.connect(dbname='InstrumentalMusic', user=userRole,
+
+                                password='98106547', host='192.168.56.101', port='5432')
+        cursor = conn.cursor()
+        cursor.callproc('descriptionadd',
+                        [idd, text])  # пример вызова функции из БД , имя и параметр на вход
+        cursor.close()
+        conn.commit()
+        conn.close()
+    except (psycopg2.OperationalError, psycopg2.errors.InvalidTextRepresentation, psycopg2.errors.UniqueViolation):
+        tkinter.messagebox.showerror(title="Ошибка",
+                                     message="Ошибка подключения к БД, возможно описание с таким ключом уже есть")
+        return False
+    tkinter.messagebox.showinfo(title="Успех", message="Описание успешно добавлено в базу")
+    return True
+
+
+def updateDescription(text, id):
+    userRole = getRole(loginUser)
+    try:
+        conn = psycopg2.connect(dbname='InstrumentalMusic', user=userRole,
+
+                                password='98106547', host='192.168.56.101', port='5432')
+        cursor = conn.cursor()
+        cursor.callproc('updatedescription',
+                        [text, id])  # пример вызова функции из БД , имя и параметр на вход
+        cursor.close()
+        conn.commit()
+        conn.close()
+    except (psycopg2.OperationalError, psycopg2.errors.InvalidTextRepresentation, psycopg2.errors.UniqueViolation):
+        tkinter.messagebox.showerror(title="Ошибка",
+                                     message="Ошибка подключения к БД")
+        return False
+    tkinter.messagebox.showinfo(title="Успех", message="Описание успешно обновлено")
+    return True

@@ -13,7 +13,6 @@ def auth(login, password, window, extrawindow):
         return True
     else:
         tkinter.messagebox.showerror(title="Ошибка", message="Неверные логин или пароль или ошибка роли")
-        print(DBManage.topCheque())
         return False
 
 
@@ -63,9 +62,9 @@ def notebook(window):
     frame4.pack()
     notebk.add(frame1, text='Клиенты')
     notebk.add(frame2, text='Сотрудники')
-    notebk.add(frame3, text="Склад")
-    notebk.add(frame4, text="Поставка")
-    widgets(frame1)
+    notebk.add(frame3, text="Отдел пианино")
+    notebk.add(frame4, text="Отдел флейт")
+    widgets(frame1, frame3)  # тут осторожнее
 
 
 def takeid(id, out1, out2, out3, out4):
@@ -100,15 +99,16 @@ def deleteClient(id, out):
     if id == '':
         tkinter.messagebox.showwarning(title="Внимание", message="Нельзя удалить пустого сотрудника")
         return False
-    else:
-        DBManage.deleteClient(id)
+    if DBManage.deleteClient(id) == True:
         out.delete(0, END)
         tkinter.messagebox.showinfo(title="Успех", message="Клиент успешно удален")
+    else:
+        tkinter.messagebox.showwarning(title="Ошибка", message="Ошибка доступа")
 
 
 def saveRatingInFile(text):
     Rating = text.get(1.0, END)
-    fileWriter = open('rating.txt', 'w',encoding='utf-8')
+    fileWriter = open('rating.txt', 'w', encoding='utf-8')
     fileWriter.write(Rating)
     fileWriter.close()
 
@@ -122,11 +122,60 @@ def ratingcheque(text):
         tkinter.messagebox.showerror(title="Ошибка доступа", message="Невозможно выполнить действие")
 
 
-def clearRating(text):
+def clearText(text):
     text.delete(1.0, END)
 
 
-def widgets(frame1):
+def getIdClient(text):
+    try:
+        listId = DBManage.getListIdClient()
+        for id in listId:
+            text.insert(END, str(id).replace(")", "").replace("(", "").replace(",", "") + '\n')
+    except TypeError:
+        tkinter.messagebox.showwarning(title="Внимание", message="Ошибка доступа")
+
+
+def getPianino(text):
+    try:
+        listPianino = DBManage.getPianinoFromWarehouse()
+        for pianino in listPianino:
+            text.insert(END, str(pianino).replace(")", "").replace("(", "").replace(",", "").
+                        replace("                ", " ").replace("              ", "") + '\n')
+    except TypeError:
+        tkinter.messagebox.showwarning(title="Внимание", message="Ошибка доступа")
+
+
+def getDescriptionPiano(id, text):
+    """
+    :param id:
+    :param text:
+    :return False or insert in text4:
+    """
+    try:
+        description = DBManage.getDescriptionPiano(id)
+        if description == False:
+            tkinter.messagebox.showwarning(title="Внимание", message="Ошибка доступа")
+            return False
+        if description == []:
+            text.insert(END, "Описания не найдено".replace("\n", "") + '\n')
+        else:
+            text.insert(END,
+                        str(description).replace(")", "").replace("(", "").
+                        replace("]", "").replace("[", "").replace(",", "").replace("'", "").replace("\\n", "") + '\n')
+    except TypeError:
+        tkinter.messagebox.showwarning(title="Внимание", message="Ошибка доступа")
+
+
+def addDescription(id, text):
+    DBManage.addDescription(id, text)
+
+
+def updateDescription(text, id):
+    DBManage.updateDescription(text, id)
+
+
+def widgets(frame1, frame3):
+    # ..................................................................................Frame1
     button1 = Button(frame1, text='Получить клиента по id', width=18, height=1, fg='black',
                      command=lambda: takeid(entry1.get(), label1, label7, label8, label9))
     label1 = Label(frame1, width=30, height=1)
@@ -146,8 +195,10 @@ def widgets(frame1):
     button3 = Button(frame1, text='Удалить клиента', width=18, height=1,
                      command=lambda: deleteClient(entry6.get(), entry6))
     button4 = Button(frame1, text="Рейтинг чеков клиентов", width=18, height=1, command=lambda: ratingcheque(text))
-    button5 = Button(frame1, text="Отчистить поле", width=18, height=1, command=lambda: clearRating(text))
+    button5 = Button(frame1, text="Отчистить поле", width=18, height=1, command=lambda: clearText(text))
     button6 = Button(frame1, text="Сохранить данные в файл", width=23, height=1, command=lambda: saveRatingInFile(text))
+    button7 = Button(frame1, text="Получить ID всех клиентов", width=23, height=1, command=lambda: getIdClient(text2))
+    button8 = Button(frame1, text="Отчистить поле", width=18, height=1, command=lambda: clearText(text2))
     label3 = Label(frame1, width=5, height=1, text="Имя", bg="gray22")
     label4 = Label(frame1, width=7, height=1, text="Фамилия", bg="gray22")
     label5 = Label(frame1, width=7, height=1, text="Телефон", bg="gray22")
@@ -158,8 +209,24 @@ def widgets(frame1):
     label10 = Label(frame1, width=35, height=1, text="Введите id клиента для его удаления из базы", bg="gray22")
     text = Text(frame1, width=40, height=10)
     text.tag_configure('bold', font='Helvetica 12 bold')
-
-    # .....
+    text2 = Text(frame1, width=40, height=10)
+    text2.tag_configure('bold', font='Helvetica 12 bold')
+    # .......................................................................................Frame1 end
+    # ........................................................................................Frame3
+    text3 = Text(frame3, width=60, height=10)
+    text3.tag_configure('bold', font='Helvetica 12 bold')
+    button9 = Button(frame3, text="Получить все пианино со склада", width=25, height=1,
+                     command=lambda: getPianino(text3))
+    text4 = Text(frame3, width=60, height=10)
+    text4.tag_configure('bold', font='Helvetica 12 bold')
+    entry7 = Entry(frame3, width=5)
+    button10 = Button(frame3, text="Получить описание пианино", width=25, height=1,
+                      command=lambda: getDescriptionPiano(entry7.get(), text4))
+    button11 = Button(frame3, text="Добавить описание пианино", width=25, height=1,
+                      command=lambda: addDescription(entry7.get(), text4.get(1.0, END)))
+    button12 = Button(frame3, text="Обновить описание", width=25, height=1,
+                      command=lambda: updateDescription(text4.get(1.0, END), entry7.get()))
+    # .........................................................................................Frame3 end
     # Упаковка виджетов
     entry1.place(x=35, y=630)
     button1.place(x=100, y=630)
@@ -183,9 +250,19 @@ def widgets(frame1):
     label6.place(x=440, y=560)
     label10.place(x=1000, y=470)
     text.place(x=25, y=210)
+    text2.place(x=500, y=210)
+    text3.place(x=10, y=10)
     button4.place(x=25, y=380)
     button5.place(x=25, y=410)
     button6.place(x=177, y=380)
+    button7.place(x=500, y=380)
+    button8.place(x=500, y=410)
+    button9.place(x=10, y=180)
+    text4.place(x=10, y=300)
+    entry7.place(x=10, y=470)
+    button10.place(x=50, y=470)
+    button11.place(x=50, y=505)
+    button12.place(x=50, y=540)
 
 
 def showWindow():
