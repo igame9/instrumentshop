@@ -224,3 +224,42 @@ def updateDescription(text, id):
         return False
     tkinter.messagebox.showinfo(title="Успех", message="Описание успешно обновлено")
     return True
+
+
+def getPianoParams(id):
+    try:
+        userRole = getRole(loginUser)
+        conn = psycopg2.connect(dbname='InstrumentalMusic', user=userRole,
+                                password='98106547', host='192.168.56.101', port='5432')
+        cursor = conn.cursor()
+        cursor.callproc('getparampiano', [id])  # пример вызова функции из БД , имя и параметр на вход
+        data = cursor.fetchall()
+        cursor.close()
+        conn.commit()
+        conn.close()
+        return data
+    except (psycopg2.OperationalError, psycopg2.errors.InvalidTextRepresentation):
+        tkinter.messagebox.showerror(title="Ошибка", message="Ошибка подключения к БД")
+        return False
+
+
+def getInfoAboutYou(login):
+    userInfo = []
+    conn = psycopg2.connect(dbname='InstrumentalMusic', user='andrey',
+                            password='98106547', host='192.168.56.101', port='5432')
+    cursor = conn.cursor()
+    cursor.callproc('getinfoaboutyou', [login])  # пример вызова функции из БД , имя и параметр на вход
+    data = cursor.fetchall()
+    for data in data:
+        name = data[0]
+        family = data[1]
+        login = data[2]
+        role = data[3]
+        userInfo.append(name)
+        userInfo.append(family)
+        userInfo.append(login)
+        userInfo.append(role)
+    cursor.close()
+    conn.commit()
+    conn.close()
+    return userInfo
