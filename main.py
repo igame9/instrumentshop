@@ -2,6 +2,7 @@ import tkinter.messagebox
 from tkinter import *
 from tkinter import ttk
 import DBManage
+import psycopg2
 
 
 def auth(login, password, window, extrawindow):
@@ -71,7 +72,7 @@ def notebook(window):
     notebk.add(frame2, text='Сотрудники')
     notebk.add(frame3, text="Отдел пианино")
     notebk.add(frame4, text="Отдел флейт")
-    notebk.add(frame5, text="Информация о поставках")
+    notebk.add(frame5, text="Отдел поставки")
     widgets(frame0, frame1, frame3, frame5)  # тут осторожнее
 
 
@@ -105,13 +106,18 @@ def addClient(name, family, telephone, email, outchange1, outchange2, outchange3
 
 def deleteClient(id, out):
     if id == '':
-        tkinter.messagebox.showwarning(title="Внимание", message="Нельзя удалить пустого сотрудника")
+        tkinter.messagebox.showwarning(title="Внимание", message="Нельзя удалить пустого клиента")
         return False
-    if DBManage.deleteClient(id) == True:
-        out.delete(0, END)
-        tkinter.messagebox.showinfo(title="Успех", message="Клиент успешно удален")
-    else:
-        tkinter.messagebox.showwarning(title="Ошибка", message="Ошибка доступа")
+    import psycopg2
+    try:
+        if DBManage.deleteClient(id) == 'Успешное удаление':
+            out.delete(0, END)
+            tkinter.messagebox.showinfo(title="Успех", message="Клиент успешно удален")
+        else:
+            tkinter.messagebox.showwarning(title="Ошибка", message="Ошибка доступа")
+    except psycopg2.errors.ForeignKeyViolation:
+        tkinter.messagebox.showwarning(title="Внимание", message="Не стоит удалять клиента из базы, "
+                                                                 "если в базе сохранились записи о его покупках")
 
 
 def saveRatingInFile(text):
@@ -198,6 +204,7 @@ def aboutYou(text):
     actionSellerPiano = "Тебе доступны все возможности из вкладки <Отдел пианино>"
     actionGuest = "Тебе ничего не доступно, у тебя гостевая роль"
     actionSellerFlute = "Тебе доступны все возможности из вкладки <Отдел флейт>"
+    actionsupplydep = "Тебе доступны все возможности из вкладки <Отдел поставки>"
     infoUser = DBManage.getInfoAboutYou(DBManage.loginUser)
     if infoUser[3] == "andrey":
         text.insert(END, "Приветствую!" + "\n" + "Имя: " + str(infoUser[0]) + "\n" +
@@ -219,9 +226,57 @@ def aboutYou(text):
         text.insert(END, "Приветствую!" + "\n" + "Имя: " + str(infoUser[0]) + "\n" +
                     "Фамилия: " + str(infoUser[1]) + "\n" + "Login: " + str(infoUser[2]) + "\n" +
                     "Роль аккаунта: " + infoUser[3] + "\n" + "Твои возможности: " + actionSellerFlute)
+    elif infoUser[3] == "supplydep":
+        text.insert(END, "Приветствую!" + "\n" + "Имя: " + str(infoUser[0]) + "\n" +
+                    "Фамилия: " + str(infoUser[1]) + "\n" + "Login: " + str(infoUser[2]) + "\n" +
+                    "Роль аккаунта: " + infoUser[3] + "\n" + "Твои возможности: " + actionsupplydep)
     else:
         text.insert(END, "Внимание информация для твоей роли не назначена!")
     text.configure(state=DISABLED)
+
+
+def getSupplyInfo(text):
+    try:
+        text.configure(state=NORMAL)
+        text.delete(1.0, END)
+        supplyInfo = DBManage.getSupplyinfo()
+        for info in supplyInfo:
+            text.insert(END,
+                        "id поставки,дата,id инструмента" + "\n" + "************" + "\n" + str(info[0]) + "\n" + str(
+                            info[1]) +
+                        "\n" + str(info[2]) + "\n" + "************")
+        text.configure(state=DISABLED)
+    except psycopg2.errors.InsufficientPrivilege:
+        tkinter.messagebox.showwarning(title="Внимание", message="Ошибка доступа")
+
+
+def addSupply(in1, in2, in1name, in2name):
+    if in1 == "" or in2 == "":
+        tkinter.messagebox.showwarning(title="Внимание", message="Нельзя добавить пустую поставку")
+        return False
+    try:
+        if DBManage.addSupply(in1, in2):
+            tkinter.messagebox.showinfo(title="Успех", message="Поставка успешно добавлена")
+            in1name.delete(0, END)
+            in2name.delete(0, END)
+    except psycopg2.errors.InvalidDatetimeFormat:
+        tkinter.messagebox.showwarning(title="Внимание", message="Неверный формат времени")
+
+
+def addInformSupply(in1, in2, in1name, in2name):
+    if in1 == "" or in2 == "":
+        tkinter.messagebox.showwarning(title="Внимание", message="Нельзя добавить пустые данные")
+        return False
+    try:
+        if DBManage.addInformSupply(in1, in2):
+            tkinter.messagebox.showinfo(title="Успех", message="Информация о поставке успешно обновлена")
+            in1name.delete(0, END)
+            in2name.delete(0, END)
+    except (psycopg2.errors.ForeignKeyViolation, psycopg2.errors.UniqueViolation):
+        tkinter.messagebox.showwarning(title="Внимание",
+                                       message="Указан неверный номер поставки или инструмента, проверьте, "
+                                               "что указан существующий код поставки "
+                                               "или, что номер инструмента уникальный")
 
 
 def widgets(frame0, frame1, frame3, frame5):
@@ -251,7 +306,7 @@ def widgets(frame0, frame1, frame3, frame5):
                      command=lambda: deleteClient(entry6.get(), entry6))
     button4 = Button(frame1, text="Рейтинг чеков клиентов", width=18, height=1, command=lambda: ratingcheque(text))
     button6 = Button(frame1, text="Сохранить данные в файл", width=23, height=1, command=lambda: saveRatingInFile(text))
-    button7 = Button(frame1, text="Получить ID всех клиентов", width=23, height=1, command=lambda: getIdClient(text2))
+    button7 = Button(frame1, text="Получить всех клиентов", width=23, height=1, command=lambda: getIdClient(text2))
     label3 = Label(frame1, width=5, height=1, text="Имя", bg="gray22")
     label4 = Label(frame1, width=7, height=1, text="Фамилия", bg="gray22")
     label5 = Label(frame1, width=7, height=1, text="Телефон", bg="gray22")
@@ -283,7 +338,20 @@ def widgets(frame0, frame1, frame3, frame5):
     # .........................................................................................Frame5
     text5 = Text(frame5, width=35, height=10)
     text5.tag_configure('bold', font='Helvetica 12 bold')
-
+    button13 = Button(frame5, text="Получить информацию о поставках", width=29, height=1,
+                      command=lambda: getSupplyInfo(text5))
+    button14 = Button(frame5, text="Зарегистрировать новую поставку в системе", width=35, height=1,
+                      command=lambda: addSupply(entry8.get(), entry9.get(), entry8, entry9))
+    entry8 = Entry(frame5, width=60)
+    entry9 = Entry(frame5, width=60)
+    label11 = Label(frame5, width=14, height=1, text="ID поставки", bg="gray22")
+    label12 = Label(frame5, width=14, height=1, text="Дата поставки", bg="gray22")
+    entry10 = Entry(frame5, width=60)
+    entry11 = Entry(frame5, width=60)
+    label13 = Label(frame5, width=15, height=1, text="ID поставки", bg="gray22")
+    label14 = Label(frame5, width=15, height=1, text="ID инструмента", bg="gray22")
+    button15 = Button(frame5, text="Добавить информацию о поставке", width=35, height=1, command=lambda:
+    addInformSupply(entry10.get(), entry11.get(), entry10, entry11))
     # .........................................................................................Frame5 end
     # Упаковка виджетов
     entry1.place(x=35, y=630)
@@ -322,6 +390,17 @@ def widgets(frame0, frame1, frame3, frame5):
     text5.place(x=50, y=50)
     text6.place(x=1, y=1)
     buttoInfo.place(x=1, y=170)
+    button13.place(x=50, y=220)
+    entry8.place(x=500, y=50)
+    entry9.place(x=500, y=100)
+    button14.place(x=500, y=220)
+    label11.place(x=390, y=50)
+    label12.place(x=390, y=100)
+    entry10.place(x=980, y=50)
+    entry11.place(x=980, y=100)
+    label13.place(x=870, y=50)
+    label14.place(x=870, y=100)
+    button15.place(x=980, y=220)
 
 
 def showWindow():
