@@ -54,6 +54,7 @@ def notebook(window):
     style.configure("2.TFrame", background="gray22")
     style.configure("3.TFrame", background="gray22")
     style.configure("5.TFrame", background="gray22")
+    style.configure("6.TFrame", background="gray22")
     notebk.pack(fill='both', expand='yes')
     frame0 = ttk.Frame(window, style="0.TFrame")
     frame1 = ttk.Frame(window, style="1.TFrame")
@@ -61,19 +62,22 @@ def notebook(window):
     frame3 = ttk.Frame(window, style="3.TFrame")
     frame4 = ttk.Frame(window)
     frame5 = ttk.Frame(window, style="5.TFrame")
+    frame6 = ttk.Frame(window, style="6.TFrame")
     frame0.pack()
     frame1.pack()
     frame2.pack()
     frame3.pack()
     frame4.pack()
     frame5.pack()
+    frame6.pack()
     notebk.add(frame0, text="О тебе")
     notebk.add(frame1, text='Клиенты')
     notebk.add(frame2, text='Сотрудники')
     notebk.add(frame3, text="Отдел пианино")
     notebk.add(frame4, text="Отдел флейт")
     notebk.add(frame5, text="Отдел поставки")
-    widgets(frame0, frame1, frame3, frame5)  # тут осторожнее
+    notebk.add(frame6, text="Склад")
+    widgets(frame0, frame1, frame3, frame5, frame6)  # тут осторожнее
 
 
 def takeid(id, out1, out2, out3, out4):
@@ -205,6 +209,7 @@ def aboutYou(text):
     actionGuest = "Тебе ничего не доступно, у тебя гостевая роль"
     actionSellerFlute = "Тебе доступны все возможности из вкладки <Отдел флейт>"
     actionsupplydep = "Тебе доступны все возможности из вкладки <Отдел поставки>"
+    actionWarehouseDep = "Тебе доступны все возможности из вкладки <Склад>"
     infoUser = DBManage.getInfoAboutYou(DBManage.loginUser)
     if infoUser[3] == "andrey":
         text.insert(END, "Приветствую!" + "\n" + "Имя: " + str(infoUser[0]) + "\n" +
@@ -230,6 +235,10 @@ def aboutYou(text):
         text.insert(END, "Приветствую!" + "\n" + "Имя: " + str(infoUser[0]) + "\n" +
                     "Фамилия: " + str(infoUser[1]) + "\n" + "Login: " + str(infoUser[2]) + "\n" +
                     "Роль аккаунта: " + infoUser[3] + "\n" + "Твои возможности: " + actionsupplydep)
+    elif infoUser[3] == "warehousedep":
+        text.insert(END, "Приветствую!" + "\n" + "Имя: " + str(infoUser[0]) + "\n" +
+                    "Фамилия: " + str(infoUser[1]) + "\n" + "Login: " + str(infoUser[2]) + "\n" +
+                    "Роль аккаунта: " + infoUser[3] + "\n" + "Твои возможности: " + actionWarehouseDep)
     else:
         text.insert(END, "Внимание информация для твоей роли не назначена!")
     text.configure(state=DISABLED)
@@ -259,27 +268,110 @@ def addSupply(in1, in2, in1name, in2name):
             tkinter.messagebox.showinfo(title="Успех", message="Поставка успешно добавлена")
             in1name.delete(0, END)
             in2name.delete(0, END)
-    except psycopg2.errors.InvalidDatetimeFormat:
-        tkinter.messagebox.showwarning(title="Внимание", message="Неверный формат времени")
+    except (psycopg2.errors.InvalidDatetimeFormat, psycopg2.errors.InsufficientPrivilege):
+        tkinter.messagebox.showwarning(title="Внимание", message="Возможна ошибка доступа или ошибка формата ввода."
+                                                                 "Проверьте есть ли у вас доступ к данной странице или"
+                                                                 "правильность ввода даты GG-MM-DD")
 
 
-def addInformSupply(in1, in2, in1name, in2name):
+def addInformSupply(in1, in2, in3, in1name, in2name, in3name):
     if in1 == "" or in2 == "":
         tkinter.messagebox.showwarning(title="Внимание", message="Нельзя добавить пустые данные")
         return False
     try:
-        if DBManage.addInformSupply(in1, in2):
+        if DBManage.addInformSupply(in1, in2, in3):
             tkinter.messagebox.showinfo(title="Успех", message="Информация о поставке успешно обновлена")
             in1name.delete(0, END)
             in2name.delete(0, END)
+            in3name.delete(0, END)
     except (psycopg2.errors.ForeignKeyViolation, psycopg2.errors.UniqueViolation):
         tkinter.messagebox.showwarning(title="Внимание",
                                        message="Указан неверный номер поставки или инструмента, проверьте, "
                                                "что указан существующий код поставки "
-                                               "или, что номер инструмента уникальный")
+                                               "или, что номер инструмента уникальный, "
+                                               "а так же, что такой тип id существует")
 
 
-def widgets(frame0, frame1, frame3, frame5):
+def numberOfSupply(in1):
+    try:
+        in1.configure(state=NORMAL)
+        in1.delete(0, END)
+        number = DBManage.getEmptyNumberOfSupply()
+        in1.insert(END, number)
+        in1.configure(state=DISABLED)
+    except psycopg2.errors.InsufficientPrivilege:
+        tkinter.messagebox.showwarning(title="Внимание", message="Ошибка доступа")
+
+
+def numberOfInstrument(in1):
+    try:
+        in1.configure(state=NORMAL)
+        in1.delete(0, END)
+        number = DBManage.getEmptyNumberOfInstrument()
+        in1.insert(END, number)
+    except psycopg2.errors.InsufficientPrivilege:
+        tkinter.messagebox.showwarning(title="Внимание", message="Ошибка доступа")
+
+
+def getSupplyFromId(in1, out1):
+    try:
+        out1.configure(state=NORMAL)
+        out1.delete(1.0, END)
+        supplyInfo = DBManage.getSupplyFromId(in1)
+        for info in supplyInfo:
+            out1.insert(END, "ID поставки, дата, ID инструмента" + "\n" + str(info[0]) + "\n" + str(info[1])
+                        + "\n" + str(info[2]) + "\n")
+    except (TypeError, psycopg2.errors.InsufficientPrivilege):
+        tkinter.messagebox.showwarning(title="Внимание", message="Ошибка доступа")
+
+
+def saveAllSupply(text):
+    Rating = text.get(1.0, END)
+    fileWriter = open('allSupply.txt', 'w', encoding='utf-8')
+    fileWriter.write(Rating)
+    fileWriter.close()
+    tkinter.messagebox.showinfo(title="Успех", message="Файл сохранен.")
+
+
+def saveSuppliFromId(text):
+    Rating = text.get(1.0, END)
+    if Rating == "":
+        tkinter.messagebox.showwarning(title="Внимание", message="Нельзя сохранить пустые данные")
+        return False
+    fileWriter = open('idSupply.txt', 'w', encoding='utf-8')
+    fileWriter.write(Rating)
+    fileWriter.close()
+    tkinter.messagebox.showinfo(title="Успех", message="Файл сохранен.")
+
+
+def getUnregisteredPianoInWarehouse(out1):
+    out1.configure(state=NORMAL)
+    out1.delete(1.0, END)
+    unregisteredPiano = DBManage.getUnregisteredPianoOnWarehouse()
+    for pianoid in unregisteredPiano:
+        out1.insert(END, str(pianoid[0]) + "\n")
+    out1.configure(state=DISABLED)
+
+
+def registerInstrumentOnWarehouse(in1, in2, in3, in4, out1, out2, out3, out4):
+    out1.delete(0, END)
+    out2.delete(0, END)
+    out3.delete(0, END)
+    out4.delete(0, END)
+    if DBManage.registerInstrumentInWarehouse(in1, in2, in3, in4):
+        tkinter.messagebox.showinfo(title="Успех", message="Инструмент зарегистрирован")
+
+
+def setEmptyCellInPianoWareHouse(in1):
+    try:
+        in1.delete(0, END)
+        Emptycell = DBManage.getEmptyCellOnPianoWarehouse()
+        in1.insert(END, Emptycell)
+    except (TypeError, psycopg2.errors.InsufficientPrivilege):
+        tkinter.messagebox.showwarning(title="Внимание", message="Ошибка доступа")
+
+
+def widgets(frame0, frame1, frame3, frame5, frame6):
     # ..................................................................................Frame0
     text6 = Text(frame0, width=60, height=10)
     text6.tag_configure('bold', font='CenturyGothic 16 bold')
@@ -338,21 +430,61 @@ def widgets(frame0, frame1, frame3, frame5):
     # .........................................................................................Frame5
     text5 = Text(frame5, width=35, height=10)
     text5.tag_configure('bold', font='Helvetica 12 bold')
+    text5.configure(state=DISABLED)
     button13 = Button(frame5, text="Получить информацию о поставках", width=29, height=1,
                       command=lambda: getSupplyInfo(text5))
     button14 = Button(frame5, text="Зарегистрировать новую поставку в системе", width=35, height=1,
                       command=lambda: addSupply(entry8.get(), entry9.get(), entry8, entry9))
+    button16 = Button(frame5, text="Допустимый номер поставки", width=25, height=1,
+                      command=lambda: numberOfSupply(entry8))
     entry8 = Entry(frame5, width=60)
+    entry8.configure(state=DISABLED)
     entry9 = Entry(frame5, width=60)
     label11 = Label(frame5, width=14, height=1, text="ID поставки", bg="gray22")
     label12 = Label(frame5, width=14, height=1, text="Дата поставки", bg="gray22")
     entry10 = Entry(frame5, width=60)
+    button17 = Button(frame5, width=26, height=1, text="Допустимый номер инструмента",
+                      command=lambda: numberOfInstrument(entry11))
     entry11 = Entry(frame5, width=60)
+    entry11.configure(state=NORMAL)
     label13 = Label(frame5, width=15, height=1, text="ID поставки", bg="gray22")
     label14 = Label(frame5, width=15, height=1, text="ID инструмента", bg="gray22")
     button15 = Button(frame5, text="Добавить информацию о поставке", width=35, height=1, command=lambda:
-    addInformSupply(entry10.get(), entry11.get(), entry10, entry11))
+    addInformSupply(entry10.get(), entry11.get(), entry13.get(), entry10, entry11, entry13))
+    text7 = Text(frame5, width=35, height=10)
+    text7.tag_configure('bold', font='Helvetica 12 bold')
+    text7.configure(state=DISABLED)
+    entry12 = Entry(frame5, width=5)
+    button18 = Button(frame5, text="Получить информация о поставке по ID", width=31, height=1,
+                      command=lambda: getSupplyFromId(entry12.get(), text7))
+    button19 = Button(frame5, text="Сохранить информацию", width=20, height=1, command=lambda: saveAllSupply(text5))
+    button20 = Button(frame5, text="Сохранить информацию", width=20, height=1, command=lambda: saveSuppliFromId(text7))
+    entry13 = Entry(frame5, width=60)
+    label15 = Label(frame5, width=15, height=1, text="Тип инструмента", bg="gray22")
+
     # .........................................................................................Frame5 end
+
+    # .........................................................................................Frame6
+    text8 = Text(frame6, width=35, height=10)
+    text8.tag_configure('bold', font='Helvetica 12 bold')
+    text8.configure(state=DISABLED)
+    button21 = Button(frame6, text="Незарегистрированные пианино на складе", width=35,
+                      command=lambda: getUnregisteredPianoInWarehouse(text8))
+    entry14 = Entry(frame6, width=60)
+    entry15 = Entry(frame6, width=60)
+    entry16 = Entry(frame6, width=60)
+    entry17 = Entry(frame6, width=60)
+    label16 = Label(frame6, width=15, height=1, text="Тип инструмента", bg="gray22")
+    label17 = Label(frame6, width=15, height=1, text="ID инструмента", bg="gray22")
+    label18 = Label(frame6, width=15, height=1, text="Ячейка на складе", bg="gray22")
+    label19 = Label(frame6, width=15, height=1, text="Артикул", bg="gray22")
+    button22 = Button(frame6, text="Зарегистрировать инструмент на складе", width=35,
+                      command=lambda: registerInstrumentOnWarehouse(entry14.get(), entry15.get()
+                                                                    , entry16.get(), entry17.get(), entry14, entry15,
+                                                                    entry16, entry17))
+    button23 = Button(frame6, text="Свободная ячейка на складе пианино", width=35,
+                      command=lambda: setEmptyCellInPianoWareHouse(entry16))
+    # .........................................................................................Frame6 end
     # Упаковка виджетов
     entry1.place(x=35, y=630)
     button1.place(x=100, y=630)
@@ -401,6 +533,27 @@ def widgets(frame0, frame1, frame3, frame5):
     label13.place(x=870, y=50)
     label14.place(x=870, y=100)
     button15.place(x=980, y=220)
+    button16.place(x=500, y=260)
+    button17.place(x=980, y=260)
+    text7.place(x=50, y=350)
+    entry12.place(x=50, y=520)
+    button18.place(x=50, y=550)
+    button19.place(x=50, y=250)
+    button20.place(x=50, y=580)
+    text8.place(x=50, y=50)
+    entry13.place(x=980, y=150)
+    label15.place(x=870, y=150)
+    button21.place(x=50, y=230)
+    entry14.place(x=500, y=50)
+    entry15.place(x=500, y=100)
+    entry16.place(x=500, y=150)
+    entry17.place(x=500, y=200)
+    label16.place(x=370, y=50)
+    label17.place(x=370, y=100)
+    label18.place(x=370, y=150)
+    label19.place(x=370, y=200)
+    button22.place(x=500, y=250)
+    button23.place(x=500, y=300)
 
 
 def showWindow():
