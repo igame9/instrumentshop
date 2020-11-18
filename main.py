@@ -345,27 +345,129 @@ def saveSuppliFromId(text):
 
 
 def getUnregisteredPianoInWarehouse(out1):
-    out1.configure(state=NORMAL)
-    out1.delete(1.0, END)
-    unregisteredPiano = DBManage.getUnregisteredPianoOnWarehouse()
-    for pianoid in unregisteredPiano:
-        out1.insert(END, str(pianoid[0]) + "\n")
-    out1.configure(state=DISABLED)
+    try:
+        out1.configure(state=NORMAL)
+        out1.delete(1.0, END)
+        unregisteredPiano = DBManage.getUnregisteredPianoOnWarehouse()
+        for pianoid in unregisteredPiano:
+            out1.insert(END, str(pianoid[0]) + "\n")
+        out1.configure(state=DISABLED)
+    except (psycopg2.errors.InsufficientPrivilege, TypeError):
+        tkinter.messagebox.showwarning(title="Внимание", message="Ошибка доступа")
 
 
-def registerInstrumentOnWarehouse(in1, in2, in3, in4, out1, out2, out3, out4):
-    out1.delete(0, END)
-    out2.delete(0, END)
-    out3.delete(0, END)
-    out4.delete(0, END)
-    if DBManage.registerInstrumentInWarehouse(in1, in2, in3, in4):
-        tkinter.messagebox.showinfo(title="Успех", message="Инструмент зарегистрирован")
+def getUnregisteredFluteInWarehouse(out1):
+    try:
+        out1.configure(state=NORMAL)
+        out1.delete(1.0, END)
+        unregisteredPiano = DBManage.getUnregisteredFluteOnWarehouse()
+        for fluteid in unregisteredPiano:
+            out1.insert(END, str(fluteid[0]) + "\n")
+        out1.configure(state=DISABLED)
+    except (psycopg2.errors.InsufficientPrivilege, TypeError):
+        tkinter.messagebox.showwarning(title="Внимание", message="Ошибка доступа")
+
+
+def getUnregisteredGuitarInWarehouse(out1):
+    try:
+        out1.configure(state=NORMAL)
+        out1.delete(1.0, END)
+        unregisteredPiano = DBManage.getUnregisteredGuitarOnWarehouse()
+        for guitarid in unregisteredPiano:
+            out1.insert(END, str(guitarid[0]) + "\n")
+        out1.configure(state=DISABLED)
+    except (psycopg2.errors.InsufficientPrivilege, TypeError):
+        tkinter.messagebox.showwarning(title="Внимание", message="Ошибка доступа")
+
+
+def getUnregisteredMicrophoneInWarehouse(out1):
+    try:
+        out1.configure(state=NORMAL)
+        out1.delete(1.0, END)
+        unregisteredPiano = DBManage.getUnregisteredMicrophoneOnWarehouse()
+        for microphoneid in unregisteredPiano:
+            out1.insert(END, str(microphoneid[0]) + "\n")
+        out1.configure(state=DISABLED)
+    except (psycopg2.errors.InsufficientPrivilege, TypeError):
+        tkinter.messagebox.showwarning(title="Внимание", message="Ошибка доступа")
+
+
+def registerInstrumentOnWarehouse(in1, in2, in3, in4, out1, out2, out3, out4):  # + проверка
+    # на занятость ячейки инструментов
+    try:
+        listIntPiano = []
+        listIntFlute = []
+        listIntGuitar = []
+        listIntMicrophone = []
+        emptycellInPiano = DBManage.getEmptyCellOnPianoWarehouse()
+        if not emptycellInPiano:
+            return False
+        emptycellFlute = DBManage.getEmptyCellOnFluteWarehouse()
+        emptycellGuitar = DBManage.getEmptyCellOnGuitarWarehouse()
+        emptycellMicrophone = DBManage.getEmptyCellOnMicrophoneWarehouse()
+        for cell in emptycellInPiano:
+            listIntPiano.append(int(cell[0]))
+        for cell in emptycellFlute:
+            listIntFlute.append(int(cell[0]))
+        for cell in emptycellGuitar:
+            listIntGuitar.append(int(cell[0]))
+        for cell in emptycellMicrophone:
+            listIntMicrophone.append(int(cell[0]))
+
+        if int(in1) == 1 and listIntGuitar[0] > int(in3):
+            tkinter.messagebox.showwarning(title="Внимание", message="Такая ячейка на складе уже занята")
+            return False
+        elif int(in1) == 2 and listIntPiano[0] > int(in3):
+            tkinter.messagebox.showwarning(title="Внимание", message="Такая ячейка на складе уже занята")
+            return False
+        elif int(in1) == 3 and listIntFlute[0] > int(in3):
+            tkinter.messagebox.showwarning(title="Внимание", message="Такая ячейка на складе уже занята")
+            return False
+        elif int(in1) == 4 and listIntMicrophone[0] > int(in3):
+            tkinter.messagebox.showwarning(title="Внимание", message="Такая ячейка на складе уже занята")
+            return False
+
+        out1.delete(0, END)
+        out2.delete(0, END)
+        out3.delete(0, END)
+        out4.delete(0, END)
+        if DBManage.registerInstrumentInWarehouse(in1, in2, in3, in4):
+            tkinter.messagebox.showinfo(title="Успех", message="Инструмент зарегистрирован")
+    except (psycopg2.errors.ForeignKeyViolation, psycopg2.errors.InsufficientPrivilege, TypeError, ValueError,):
+        tkinter.messagebox.showwarning(title="Внимание", message="Проверьте правильность данных или ошибка доступа")
 
 
 def setEmptyCellInPianoWareHouse(in1):
     try:
         in1.delete(0, END)
         Emptycell = DBManage.getEmptyCellOnPianoWarehouse()
+        in1.insert(END, Emptycell)
+    except (TypeError, psycopg2.errors.InsufficientPrivilege):
+        tkinter.messagebox.showwarning(title="Внимание", message="Ошибка доступа")
+
+
+def setEmptyCellInFluteWareHouse(in1):
+    try:
+        in1.delete(0, END)
+        Emptycell = DBManage.getEmptyCellOnFluteWarehouse()
+        in1.insert(END, Emptycell)
+    except (TypeError, psycopg2.errors.InsufficientPrivilege):
+        tkinter.messagebox.showwarning(title="Внимание", message="Ошибка доступа")
+
+
+def setEmptyCellInGuitarWareHouse(in1):
+    try:
+        in1.delete(0, END)
+        Emptycell = DBManage.getEmptyCellOnGuitarWarehouse()
+        in1.insert(END, Emptycell)
+    except (TypeError, psycopg2.errors.InsufficientPrivilege):
+        tkinter.messagebox.showwarning(title="Внимание", message="Ошибка доступа")
+
+
+def setEmptyCellInMicrophoneWareHouse(in1):
+    try:
+        in1.delete(0, END)
+        Emptycell = DBManage.getEmptyCellOnMicrophoneWarehouse()
         in1.insert(END, Emptycell)
     except (TypeError, psycopg2.errors.InsufficientPrivilege):
         tkinter.messagebox.showwarning(title="Внимание", message="Ошибка доступа")
@@ -468,7 +570,7 @@ def widgets(frame0, frame1, frame3, frame5, frame6):
     text8 = Text(frame6, width=35, height=10)
     text8.tag_configure('bold', font='Helvetica 12 bold')
     text8.configure(state=DISABLED)
-    button21 = Button(frame6, text="Незарегистрированные пианино на складе", width=35,
+    button21 = Button(frame6, text="Незарегистрированные пианино на складе", width=36,
                       command=lambda: getUnregisteredPianoInWarehouse(text8))
     entry14 = Entry(frame6, width=60)
     entry15 = Entry(frame6, width=60)
@@ -484,6 +586,18 @@ def widgets(frame0, frame1, frame3, frame5, frame6):
                                                                     entry16, entry17))
     button23 = Button(frame6, text="Свободная ячейка на складе пианино", width=35,
                       command=lambda: setEmptyCellInPianoWareHouse(entry16))
+    button24 = Button(frame6, text="Незарегистрированные флейты на складе", width=36,
+                      command=lambda: getUnregisteredFluteInWarehouse(text8))
+    button25 = Button(frame6, text="Свободная ячейка на складе флейт", width=35,
+                      command=lambda: setEmptyCellInFluteWareHouse(entry16))
+    button26 = Button(frame6, text="Незарегистрированные гитары на складе", width=36,
+                      command=lambda: getUnregisteredGuitarInWarehouse(text8))
+    button27 = Button(frame6, text="Свободная ячейка на складе гитар", width=35,
+                      command=lambda: setEmptyCellInGuitarWareHouse(entry16))
+    button28 = Button(frame6, text="Незарегистрированные микрофоны на складе", width=36,
+                      command=lambda: getUnregisteredMicrophoneInWarehouse(text8))
+    button29 = Button(frame6, text="Свободная ячейка на складе микрофонов", width=35,
+                      command=lambda: setEmptyCellInMicrophoneWareHouse(entry16))
     # .........................................................................................Frame6 end
     # Упаковка виджетов
     entry1.place(x=35, y=630)
@@ -554,6 +668,12 @@ def widgets(frame0, frame1, frame3, frame5, frame6):
     label19.place(x=370, y=200)
     button22.place(x=500, y=250)
     button23.place(x=500, y=300)
+    button24.place(x=50, y=260)
+    button25.place(x=500, y=330)
+    button26.place(x=50, y=290)
+    button27.place(x=500, y=360)
+    button28.place(x=50, y=320)
+    button29.place(x=500, y=390)
 
 
 def showWindow():

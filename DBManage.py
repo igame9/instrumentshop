@@ -423,6 +423,108 @@ def registerInstrumentInWarehouse(idtype, instrumentid, storagecell, idarticul):
         conn.commit()
         conn.close()
         return True
+    except (psycopg2.OperationalError, psycopg2.errors.InvalidTextRepresentation, psycopg2.errors.UniqueViolation):
+        tkinter.messagebox.showerror(title="Ошибка", message="Ошибка подключения к БД")
+        return False
+
+
+def getUnregisteredFluteOnWarehouse():
+    try:
+        userRole = getRole(loginUser)
+        conn = psycopg2.connect(dbname='InstrumentalMusic', user=userRole,
+                                password='98106547', host='192.168.56.101', port='5432')
+        cursor = conn.cursor()
+        cursor.callproc('unregisteredfluteinwarehouse', [])  # пример вызова функции из БД , имя и параметр на вход
+        number = cursor.fetchall()
+        cursor.close()
+        conn.commit()
+        conn.close()
+        return number
+    except (psycopg2.OperationalError, psycopg2.errors.InvalidTextRepresentation):
+        tkinter.messagebox.showerror(title="Ошибка", message="Ошибка подключения к БД")
+        return False
+
+
+def getEmptyCellOnFluteWarehouse():
+    try:
+        userRole = getRole(loginUser)
+        conn = psycopg2.connect(dbname='InstrumentalMusic', user=userRole,
+                                password='98106547', host='192.168.56.101', port='5432')
+        cursor = conn.cursor()
+        cursor.callproc('emptycellonflutewarehouse', [])  # пример вызова функции из БД , имя и параметр на вход
+        number = cursor.fetchall()
+        cursor.close()
+        conn.commit()
+        conn.close()
+        return number
+    except (psycopg2.OperationalError, psycopg2.errors.InvalidTextRepresentation):
+        tkinter.messagebox.showerror(title="Ошибка", message="Ошибка подключения к БД")
+        return False
+
+
+def getUnregisteredGuitarOnWarehouse():
+    try:
+        userRole = getRole(loginUser)
+        conn = psycopg2.connect(dbname='InstrumentalMusic', user=userRole,
+                                password='98106547', host='192.168.56.101', port='5432')
+        cursor = conn.cursor()
+        cursor.callproc('unregisteredguitarinwarehouse', [])  # пример вызова функции из БД , имя и параметр на вход
+        number = cursor.fetchall()
+        cursor.close()
+        conn.commit()
+        conn.close()
+        return number
+    except (psycopg2.OperationalError, psycopg2.errors.InvalidTextRepresentation):
+        tkinter.messagebox.showerror(title="Ошибка", message="Ошибка подключения к БД")
+        return False
+
+
+def getEmptyCellOnGuitarWarehouse():
+    try:
+        userRole = getRole(loginUser)
+        conn = psycopg2.connect(dbname='InstrumentalMusic', user=userRole,
+                                password='98106547', host='192.168.56.101', port='5432')
+        cursor = conn.cursor()
+        cursor.callproc('emptycellonguitarwarehouse', [])  # пример вызова функции из БД , имя и параметр на вход
+        number = cursor.fetchall()
+        cursor.close()
+        conn.commit()
+        conn.close()
+        return number
+    except (psycopg2.OperationalError, psycopg2.errors.InvalidTextRepresentation):
+        tkinter.messagebox.showerror(title="Ошибка", message="Ошибка подключения к БД")
+        return False
+
+
+def getUnregisteredMicrophoneOnWarehouse():
+    try:
+        userRole = getRole(loginUser)
+        conn = psycopg2.connect(dbname='InstrumentalMusic', user=userRole,
+                                password='98106547', host='192.168.56.101', port='5432')
+        cursor = conn.cursor()
+        cursor.callproc('unregisteredmicrophoneinwarehouse', [])  # пример вызова функции из БД , имя и параметр на вход
+        number = cursor.fetchall()
+        cursor.close()
+        conn.commit()
+        conn.close()
+        return number
+    except (psycopg2.OperationalError, psycopg2.errors.InvalidTextRepresentation):
+        tkinter.messagebox.showerror(title="Ошибка", message="Ошибка подключения к БД")
+        return False
+
+
+def getEmptyCellOnMicrophoneWarehouse():
+    try:
+        userRole = getRole(loginUser)
+        conn = psycopg2.connect(dbname='InstrumentalMusic', user=userRole,
+                                password='98106547', host='192.168.56.101', port='5432')
+        cursor = conn.cursor()
+        cursor.callproc('emptycellonmicrophonewarehouse', [])  # пример вызова функции из БД , имя и параметр на вход
+        number = cursor.fetchall()
+        cursor.close()
+        conn.commit()
+        conn.close()
+        return number
     except (psycopg2.OperationalError, psycopg2.errors.InvalidTextRepresentation):
         tkinter.messagebox.showerror(title="Ошибка", message="Ошибка подключения к БД")
         return False
