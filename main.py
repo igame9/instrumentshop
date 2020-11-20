@@ -53,16 +53,19 @@ def notebook(window):
     style.configure("1.TFrame", background="gray22")
     style.configure("2.TFrame", background="gray22")
     style.configure("3.TFrame", background="gray22")
+    style.configure("4.TFrame", background="gray22")
     style.configure("5.TFrame", background="gray22")
     style.configure("6.TFrame", background="gray22")
+    style.configure("7.TFrame", background="gray22")
     notebk.pack(fill='both', expand='yes')
     frame0 = ttk.Frame(window, style="0.TFrame")
     frame1 = ttk.Frame(window, style="1.TFrame")
     frame2 = ttk.Frame(window, style="2.TFrame")
     frame3 = ttk.Frame(window, style="3.TFrame")
-    frame4 = ttk.Frame(window)
+    frame4 = ttk.Frame(window, style="4.TFrame")
     frame5 = ttk.Frame(window, style="5.TFrame")
     frame6 = ttk.Frame(window, style="6.TFrame")
+    frame7 = ttk.Frame(window, style="7.TFrame")
     frame0.pack()
     frame1.pack()
     frame2.pack()
@@ -70,6 +73,7 @@ def notebook(window):
     frame4.pack()
     frame5.pack()
     frame6.pack()
+    frame7.pack()
     notebk.add(frame0, text="О тебе")
     notebk.add(frame1, text='Клиенты')
     notebk.add(frame2, text='Сотрудники')
@@ -77,7 +81,8 @@ def notebook(window):
     notebk.add(frame4, text="Отдел флейт")
     notebk.add(frame5, text="Отдел поставки")
     notebk.add(frame6, text="Склад")
-    widgets(frame0, frame1, frame3, frame5, frame6)  # тут осторожнее
+    notebk.add(frame7, text="Справочник")
+    widgets(frame0, frame1, frame2, frame3, frame4, frame5, frame6, frame7)  # тут осторожнее
 
 
 def takeid(id, out1, out2, out3, out4):
@@ -174,6 +179,7 @@ def getDescriptionPiano(id, text):
     :param text:
     :return False or insert in text4:
     """
+    text.configure(state=NORMAL)
     text.delete(1.0, END)
     try:
         description = DBManage.getDescriptionPiano(id)
@@ -190,6 +196,7 @@ def getDescriptionPiano(id, text):
                         '\n' + "**********************" + "\n" + "Параметры инструмента:" + "\n" +
                         str(params).replace("[", "").replace("]", "").replace(")", "").replace("(", "").replace(",",
                                                                                                                 ""))
+            text.configure(state=NORMAL)
     except TypeError:
         tkinter.messagebox.showwarning(title="Внимание", message="Ошибка доступа")
 
@@ -473,7 +480,78 @@ def setEmptyCellInMicrophoneWareHouse(in1):
         tkinter.messagebox.showwarning(title="Внимание", message="Ошибка доступа")
 
 
-def widgets(frame0, frame1, frame3, frame5, frame6):
+def getDictwithInstrument(out1):
+    try:
+        out1.configure(state=NORMAL)
+        out1.delete(1.0, END)
+        dictWitchInstrument = DBManage.getTypeInstrument()
+        out1.insert(END, "ID type и наименование инструмента" + "\n")
+        for instrument in dictWitchInstrument:
+            out1.insert(END, str(instrument).replace(")", "").replace("(", "").replace("'", "") + "\n")
+        out1.configure(state=DISABLED)
+    except (psycopg2.errors.InsufficientPrivilege, TypeError):
+        tkinter.messagebox.showwarning(title="Внимание", message="Ошибка доступа")
+
+
+def getDictwithArticulInstrument(out1):
+    try:
+        out1.configure(state=NORMAL)
+        out1.delete(1.0, END)
+        dictWitchArticul = DBManage.getArticulInstrument()
+        out1.insert(END, "ID type и наименование артикула" + "\n")
+        for instrument in dictWitchArticul:
+            out1.insert(END, str(instrument)
+                        .replace("                  ", "")
+                        .replace("              ", "")
+                        .replace(")", "")
+                        .replace("(", "")
+                        .replace("           ", "")
+                        .replace("            ", "")
+                        .replace("'", "")
+                        + "\n")
+        out1.configure(state=DISABLED)
+    except (psycopg2.errors.InsufficientPrivilege, TypeError):
+        tkinter.messagebox.showwarning(title="Внимание", message="Ошибка доступа")
+
+
+def getParamsInstrument(out1):
+    try:
+        out1.configure(state=NORMAL)
+        out1.delete(1.0, END)
+        dictWithParams = DBManage.getParamInstrument()
+        out1.insert(END, "ID param и наименование параметра" + "\n")
+        for instrument in dictWithParams:
+            out1.insert(END, str(instrument).replace(")", "").replace("(", "").replace("'", "") + "\n")
+        out1.configure(state=DISABLED)
+    except (psycopg2.errors.InsufficientPrivilege, TypeError):
+        tkinter.messagebox.showwarning(title="Внимание", message="Ошибка доступа")
+
+
+def addarticul(in1, in2, in3, in1name, in2name, in3name):
+    if in1 == "" or in2 == "" or in3 == "":
+        tkinter.messagebox.showwarning(title="Внимание", message="Нельзя создать пустой артикул")
+        return False
+    try:
+        if DBManage.addArticul(in1, in2, in3):
+            tkinter.messagebox.showinfo(title="Успех", message="Артикул успешно добавлен")
+            in1name.delete(0, END)
+            in2name.delete(0, END)
+            in3name.delete(0, END)
+    except (psycopg2.errors.ForeignKeyViolation, psycopg2.errors.UniqueViolation):
+        tkinter.messagebox.showwarning(title="Внимание",
+                                       message="Проверьте корректность данных "
+                                               "или же ошибка доступа")
+
+def getEmptyArticulId(in1):
+    try:
+        in1.delete(0, END)
+        freeId = DBManage.getEmptyIdArticulInsturment()
+        in1.insert(END, freeId)
+    except (TypeError, psycopg2.errors.InsufficientPrivilege):
+        tkinter.messagebox.showwarning(title="Внимание", message="Ошибка доступа")
+
+
+def widgets(frame0, frame1, frame2, frame3, frame4, frame5, frame6, frame7):
     # ..................................................................................Frame0
     text6 = Text(frame0, width=60, height=10)
     text6.tag_configure('bold', font='CenturyGothic 16 bold')
@@ -516,10 +594,12 @@ def widgets(frame0, frame1, frame3, frame5, frame6):
     # .......................................................................................Frame1 end
     # ........................................................................................Frame3
     text3 = Text(frame3, width=60, height=10)
+    text3.configure(state=DISABLED)
     text3.tag_configure('bold', font='Helvetica 12 bold')
     button9 = Button(frame3, text="Получить все пианино со склада", width=25, height=1,
                      command=lambda: getPianino(text3))
     text4 = Text(frame3, width=60, height=10)
+    text4.configure(state=DISABLED)
     text4.tag_configure('bold', font='Helvetica 12 bold')
     entry7 = Entry(frame3, width=5)
     button10 = Button(frame3, text="Получить описание пианино", width=25, height=1,
@@ -599,6 +679,25 @@ def widgets(frame0, frame1, frame3, frame5, frame6):
     button29 = Button(frame6, text="Свободная ячейка на складе микрофонов", width=35,
                       command=lambda: setEmptyCellInMicrophoneWareHouse(entry16))
     # .........................................................................................Frame6 end
+    # .........................................................................................Frame7
+    text9 = Text(frame7, width=35, height=10)
+    text9.tag_configure('bold', font='Helvetica 12 bold')
+    text9.configure(state=DISABLED)
+    button30 = Button(frame7, text="Получить ID инструментов", width=39, command=lambda: getDictwithInstrument(text9))
+    button31 = Button(frame7, text="Получить ID артикулов", width=39,
+                      command=lambda: getDictwithArticulInstrument(text9))
+    button32 = Button(frame7, text="Получить ID параметров", width=39, command=lambda: getParamsInstrument(text9))
+    entry18 = Entry(frame7, width=60)
+    entry19 = Entry(frame7, width=60)
+    entry20 = Entry(frame7, width=60)
+    label20 = Label(frame7, width=15, height=1, text="ID артикула", bg="gray22")
+    label21 = Label(frame7, width=15, height=1, text="ID типа инструмента", bg="gray22")
+    label22 = Label(frame7, width=15, height=1, text="Наименование", bg="gray22")
+    button33 = Button(frame7, width=39, text="Зарегистрировать новый артикул",
+                      command=lambda: addarticul(entry18.get(), entry19.get(), entry20.get(),
+                                                 entry18, entry19, entry20))
+    button34 = Button(frame7, width=39, text="Свободный ID артикула", command= lambda: getEmptyArticulId(entry18))
+    # .........................................................................................Frame7 end
     # Упаковка виджетов
     entry1.place(x=35, y=630)
     button1.place(x=100, y=630)
@@ -674,7 +773,18 @@ def widgets(frame0, frame1, frame3, frame5, frame6):
     button27.place(x=500, y=360)
     button28.place(x=50, y=320)
     button29.place(x=500, y=390)
-
+    text9.place(x=50, y=50)
+    button30.place(x=50, y=230)
+    button31.place(x=50, y=260)
+    button32.place(x=50, y=290)
+    entry18.place(x=500, y=50)
+    entry19.place(x=500, y=100)
+    entry20.place(x=500, y=150)
+    label20.place(x=370, y=50)
+    label21.place(x=370, y=100)
+    label22.place(x=370, y=150)
+    button33.place(x=500, y=200)
+    button34.place(x=500,y=230)
 
 def showWindow():
     window = Tk()
