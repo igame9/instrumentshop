@@ -4,14 +4,14 @@ import tkinter.messagebox
 loginUser = ''  # тут хранится логин пользователя, получаемый из функции main.auth()
 
 
-def selectClientName(id):  # функция достать клиента по id из БД - вызывает функцию getClient
+def selectClientName(Email):  # функция достать клиента по id из БД - вызывает функцию getClient
     client = []
     userRole = getRole(loginUser)
     try:
         conn = psycopg2.connect(dbname='InstrumentalMusic', user=userRole,
                                 password='9810', host='192.168.56.101', port='5432')
         cursor = conn.cursor()
-        cursor.callproc('getclient', [id])  # пример вызова функции из БД , имя и параметр на вход
+        cursor.callproc('getclientbyemail', [Email])  # пример вызова функции из БД , имя и параметр на вход
         data = cursor.fetchall()  # возвращает список всех строк, полученных из запроса
         for data in data:
             name = data[0]
@@ -605,6 +605,42 @@ def getEmptyIdArticulInsturment():
                                 password='98106547', host='192.168.56.101', port='5432')
         cursor = conn.cursor()
         cursor.callproc('getemptyarticulinstrument', [])  # пример вызова функции из БД , имя и параметр на вход
+        number = cursor.fetchall()
+        cursor.close()
+        conn.commit()
+        conn.close()
+        return number
+    except (psycopg2.OperationalError, psycopg2.errors.InvalidTextRepresentation):
+        tkinter.messagebox.showerror(title="Ошибка", message="Ошибка подключения к БД")
+        return False
+
+
+def getAllArticulsName(): # системная
+    articulsName = []
+    try:
+        conn = psycopg2.connect(dbname='InstrumentalMusic', user="andrey",
+                                password='98106547', host='192.168.56.101', port='5432')
+        cursor = conn.cursor()
+        cursor.callproc('getallarticuls', [])  # пример вызова функции из БД , имя и параметр на вход
+        allarticuls = cursor.fetchall()
+        for articul in allarticuls:
+            articulsName.append(str(articul).replace("                ", "").replace("'", "").replace(",", "").
+                                replace("           ", "").replace(")", "").replace("(", ""))
+        cursor.close()
+        conn.commit()
+        conn.close()
+        return articulsName
+    except (psycopg2.OperationalError, psycopg2.errors.InvalidTextRepresentation):
+        tkinter.messagebox.showerror(title="Ошибка", message="Ошибка подключения к БД")
+        return False
+
+
+def findArticulFromName(nameArticul): # системная
+    try:
+        conn = psycopg2.connect(dbname='InstrumentalMusic', user="andrey",
+                                password='98106547', host='192.168.56.101', port='5432')
+        cursor = conn.cursor()
+        cursor.callproc('findarticulfromname', [nameArticul])  # пример вызова функции из БД , имя и параметр на вход
         number = cursor.fetchall()
         cursor.close()
         conn.commit()

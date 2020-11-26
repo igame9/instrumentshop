@@ -85,8 +85,9 @@ def notebook(window):
     widgets(frame0, frame1, frame2, frame3, frame4, frame5, frame6, frame7)  # тут осторожнее
 
 
-def takeid(id, out1, out2, out3, out4):
-    name = DBManage.selectClientName(id)
+def takeid(Email, out1, out2, out3, out4):
+    print(Email)
+    name = DBManage.selectClientName(Email)
     if name == 0:
         name = ""
     if name == "" or name == []:
@@ -264,6 +265,8 @@ def getSupplyInfo(text):
         text.configure(state=DISABLED)
     except psycopg2.errors.InsufficientPrivilege:
         tkinter.messagebox.showwarning(title="Внимание", message="Ошибка доступа")
+    except TypeError:
+        tkinter.messagebox.showwarning(title="Внимание", message="Ошибка доступа")
 
 
 def addSupply(in1, in2, in1name, in2name):
@@ -281,7 +284,19 @@ def addSupply(in1, in2, in1name, in2name):
                                                                  "правильность ввода даты GG-MM-DD")
 
 
-def addInformSupply(in1, in2, in3, in1name, in2name, in3name):
+def getOptionMenuValue(selection):
+    return selection
+
+
+def addInformSupply(in1, in2, optionMenuValue, in1name, in2name):
+    optionVal = optionMenuValue
+    in3 = 0
+    if optionVal == "Гитара":
+        in3 = 1
+    if optionVal == "Пианино":
+        in3 = 2
+    if optionVal == "Флейта":
+        in3 = 3
     if in1 == "" or in2 == "":
         tkinter.messagebox.showwarning(title="Внимание", message="Нельзя добавить пустые данные")
         return False
@@ -290,7 +305,6 @@ def addInformSupply(in1, in2, in3, in1name, in2name, in3name):
             tkinter.messagebox.showinfo(title="Успех", message="Информация о поставке успешно обновлена")
             in1name.delete(0, END)
             in2name.delete(0, END)
-            in3name.delete(0, END)
     except (psycopg2.errors.ForeignKeyViolation, psycopg2.errors.UniqueViolation):
         tkinter.messagebox.showwarning(title="Внимание",
                                        message="Указан неверный номер поставки или инструмента, проверьте, "
@@ -399,8 +413,20 @@ def getUnregisteredMicrophoneInWarehouse(out1):
         tkinter.messagebox.showwarning(title="Внимание", message="Ошибка доступа")
 
 
-def registerInstrumentOnWarehouse(in1, in2, in3, in4, out1, out2, out3, out4):  # + проверка
+def registerInstrumentOnWarehouse(in1, in2, in3, in4, out2, out3):  # + проверка
     # на занятость ячейки инструментов
+    if in1 == "Гитара":
+        in1 = 1
+    if in1 == "Пианино":
+        in1 = 2
+    if in1 == "Флейта":
+        in1 = 3
+    if in1 == "Микрофон":
+        in1 = 4
+    idArticulList = []
+    idArticul = DBManage.findArticulFromName(in4)
+    for articul in idArticul:
+        idArticulList.append(int(articul[0]))
     try:
         listIntPiano = []
         listIntFlute = []
@@ -434,11 +460,9 @@ def registerInstrumentOnWarehouse(in1, in2, in3, in4, out1, out2, out3, out4):  
             tkinter.messagebox.showwarning(title="Внимание", message="Такая ячейка на складе уже занята")
             return False
 
-        out1.delete(0, END)
         out2.delete(0, END)
         out3.delete(0, END)
-        out4.delete(0, END)
-        if DBManage.registerInstrumentInWarehouse(in1, in2, in3, in4):
+        if DBManage.registerInstrumentInWarehouse(in1, in2, in3, idArticulList[0]):
             tkinter.messagebox.showinfo(title="Успех", message="Инструмент зарегистрирован")
     except (psycopg2.errors.ForeignKeyViolation, psycopg2.errors.InsufficientPrivilege, TypeError, ValueError,):
         tkinter.messagebox.showwarning(title="Внимание", message="Проверьте правильность данных или ошибка доступа")
@@ -542,6 +566,7 @@ def addarticul(in1, in2, in3, in1name, in2name, in3name):
                                        message="Проверьте корректность данных "
                                                "или же ошибка доступа")
 
+
 def getEmptyArticulId(in1):
     try:
         in1.delete(0, END)
@@ -551,6 +576,11 @@ def getEmptyArticulId(in1):
         tkinter.messagebox.showwarning(title="Внимание", message="Ошибка доступа")
 
 
+def fillOptionMenu3():
+    fill = DBManage.getAllArticulsName()
+    return fill
+
+
 def widgets(frame0, frame1, frame2, frame3, frame4, frame5, frame6, frame7):
     # ..................................................................................Frame0
     text6 = Text(frame0, width=60, height=10)
@@ -558,10 +588,10 @@ def widgets(frame0, frame1, frame2, frame3, frame4, frame5, frame6, frame7):
     buttoInfo = Button(frame0, text="Информация", width=10, height=1, command=lambda: aboutYou(text6))
     # ..................................................................................Frame0 end
     # ..................................................................................Frame1
-    button1 = Button(frame1, text='Получить клиента по id', width=18, height=1, fg='black',
+    button1 = Button(frame1, text='Получить клиента по E-mail', width=25, height=1, fg='black',
                      command=lambda: takeid(entry1.get(), label1, label7, label8, label9))
     label1 = Label(frame1, width=30, height=1)
-    entry1 = Entry(frame1, width=5)
+    entry1 = Entry(frame1, width=25)
     label2 = Label(frame1, width=30, height=1, text="Введите id клиента для поиска")
     sep1 = ttk.Separator(frame1, orient="vertical")
     sep2 = ttk.Separator(frame1, orient="vertical")
@@ -632,7 +662,7 @@ def widgets(frame0, frame1, frame2, frame3, frame4, frame5, frame6, frame7):
     label13 = Label(frame5, width=15, height=1, text="ID поставки", bg="gray22")
     label14 = Label(frame5, width=15, height=1, text="ID инструмента", bg="gray22")
     button15 = Button(frame5, text="Добавить информацию о поставке", width=35, height=1, command=lambda:
-    addInformSupply(entry10.get(), entry11.get(), entry13.get(), entry10, entry11, entry13))
+    addInformSupply(entry10.get(), entry11.get(), optionMenuVar.get(), entry10, entry11))
     text7 = Text(frame5, width=35, height=10)
     text7.tag_configure('bold', font='Helvetica 12 bold')
     text7.configure(state=DISABLED)
@@ -641,8 +671,9 @@ def widgets(frame0, frame1, frame2, frame3, frame4, frame5, frame6, frame7):
                       command=lambda: getSupplyFromId(entry12.get(), text7))
     button19 = Button(frame5, text="Сохранить информацию", width=20, height=1, command=lambda: saveAllSupply(text5))
     button20 = Button(frame5, text="Сохранить информацию", width=20, height=1, command=lambda: saveSuppliFromId(text7))
-    entry13 = Entry(frame5, width=60)
     label15 = Label(frame5, width=15, height=1, text="Тип инструмента", bg="gray22")
+    optionMenuVar = StringVar()
+    OptionTypeInstrument = OptionMenu(frame5, optionMenuVar, "Гитара", "Пианино", "Флейта")
 
     # .........................................................................................Frame5 end
 
@@ -652,18 +683,22 @@ def widgets(frame0, frame1, frame2, frame3, frame4, frame5, frame6, frame7):
     text8.configure(state=DISABLED)
     button21 = Button(frame6, text="Незарегистрированные пианино на складе", width=36,
                       command=lambda: getUnregisteredPianoInWarehouse(text8))
-    entry14 = Entry(frame6, width=60)
+    optionMenuVar2 = StringVar()
+    OptionTypeInstrument2 = OptionMenu(frame6, optionMenuVar2, "Гитара", "Пианино", "Флейта", "Микрофон")
+    fill = fillOptionMenu3()
+    optionMenuVar3 = StringVar()
+    OptionTypeInstrument3 = OptionMenu(frame6, optionMenuVar3, *fill)  # динамическое заполнение optionMenu
     entry15 = Entry(frame6, width=60)
     entry16 = Entry(frame6, width=60)
-    entry17 = Entry(frame6, width=60)
     label16 = Label(frame6, width=15, height=1, text="Тип инструмента", bg="gray22")
     label17 = Label(frame6, width=15, height=1, text="ID инструмента", bg="gray22")
     label18 = Label(frame6, width=15, height=1, text="Ячейка на складе", bg="gray22")
     label19 = Label(frame6, width=15, height=1, text="Артикул", bg="gray22")
     button22 = Button(frame6, text="Зарегистрировать инструмент на складе", width=35,
-                      command=lambda: registerInstrumentOnWarehouse(entry14.get(), entry15.get()
-                                                                    , entry16.get(), entry17.get(), entry14, entry15,
-                                                                    entry16, entry17))
+                      command=lambda: registerInstrumentOnWarehouse(optionMenuVar2.get(), entry15.get()
+                                                                    , entry16.get(), optionMenuVar3.get(),
+                                                                    entry15,
+                                                                    entry16))
     button23 = Button(frame6, text="Свободная ячейка на складе пианино", width=35,
                       command=lambda: setEmptyCellInPianoWareHouse(entry16))
     button24 = Button(frame6, text="Незарегистрированные флейты на складе", width=36,
@@ -696,11 +731,11 @@ def widgets(frame0, frame1, frame2, frame3, frame4, frame5, frame6, frame7):
     button33 = Button(frame7, width=39, text="Зарегистрировать новый артикул",
                       command=lambda: addarticul(entry18.get(), entry19.get(), entry20.get(),
                                                  entry18, entry19, entry20))
-    button34 = Button(frame7, width=39, text="Свободный ID артикула", command= lambda: getEmptyArticulId(entry18))
+    button34 = Button(frame7, width=39, text="Свободный ID артикула", command=lambda: getEmptyArticulId(entry18))
     # .........................................................................................Frame7 end
     # Упаковка виджетов
     entry1.place(x=35, y=630)
-    button1.place(x=100, y=630)
+    button1.place(x=200, y=630)
     label1.place(x=35, y=500)
     label7.place(x=35, y=530)
     label8.place(x=35, y=560)
@@ -754,13 +789,12 @@ def widgets(frame0, frame1, frame2, frame3, frame4, frame5, frame6, frame7):
     button19.place(x=50, y=250)
     button20.place(x=50, y=580)
     text8.place(x=50, y=50)
-    entry13.place(x=980, y=150)
+    OptionTypeInstrument.place(x=980, y=150)
     label15.place(x=870, y=150)
     button21.place(x=50, y=230)
-    entry14.place(x=500, y=50)
     entry15.place(x=500, y=100)
     entry16.place(x=500, y=150)
-    entry17.place(x=500, y=200)
+    OptionTypeInstrument3.place(x=500, y=200)
     label16.place(x=370, y=50)
     label17.place(x=370, y=100)
     label18.place(x=370, y=150)
@@ -784,7 +818,9 @@ def widgets(frame0, frame1, frame2, frame3, frame4, frame5, frame6, frame7):
     label21.place(x=370, y=100)
     label22.place(x=370, y=150)
     button33.place(x=500, y=200)
-    button34.place(x=500,y=230)
+    button34.place(x=500, y=230)
+    OptionTypeInstrument2.place(x=500, y=50)
+
 
 def showWindow():
     window = Tk()
