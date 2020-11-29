@@ -143,19 +143,33 @@ def ratingcheque(text):
     try:
         rating = DBManage.topCheque()
         for rate in rating:
-            text.insert(END, str(rate).replace('\\xa0', '').replace("(", "").replace(")", "").replace("'", "") + '\n')
+            text.insert(END, str(rate)
+                        .replace('\\xa0', '')
+                        .replace("(", "")
+                        .replace(")", "")
+                        .replace("'", "")
+                        + '\n')
         text.configure(state=DISABLED)
     except TypeError:
         tkinter.messagebox.showerror(title="Ошибка доступа", message="Невозможно выполнить действие")
 
 
-def getIdClient(text):
+def getIdClient(text, dateandtime):
     text.configure(state=NORMAL)
     text.delete(1.0, END)
     try:
-        listId = DBManage.getListIdClient()
+        listId = DBManage.getListIdClient(dateandtime)
         for id in listId:
-            text.insert(END, str(id).replace(")", "").replace("(", "").replace(",", "") + '\n')
+            text.insert(END, "\n" + "***********" +
+                        "\n" +
+                        str(id[0]) + " " +
+                        str(id[1]) + " " +
+                        str(id[2]) + " " +
+                        str(id[3]) + " " +
+                        str(id[4]) + " " +
+                        str(id[5]) + '\n'
+                        + "***********"
+                        + "\n")
         text.configure(state=DISABLED)
     except TypeError:
         tkinter.messagebox.showwarning(title="Внимание", message="Ошибка доступа")
@@ -167,8 +181,13 @@ def getPianino(text):
     try:
         listPianino = DBManage.getPianinoFromWarehouse()
         for pianino in listPianino:
-            text.insert(END, str(pianino).replace(")", "").replace("(", "").replace(",", "").
-                        replace("                ", " ").replace("              ", "") + '\n')
+            text.insert(END, str(pianino)
+                        .replace(")", "")
+                        .replace("(", "")
+                        .replace(",", "")
+                        .replace("                ", " ")
+                        .replace("              ", "")
+                        + '\n')
         text.configure(state=DISABLED)
     except TypeError:
         tkinter.messagebox.showwarning(title="Внимание", message="Ошибка доступа")
@@ -192,11 +211,22 @@ def getDescriptionPiano(id, text):
             text.insert(END, "Описания не найдено".replace("\n", "") + '\n')
         else:
             text.insert(END,
-                        str(description).replace(")", "").replace("(", "").
-                        replace("]", "").replace("[", "").replace(",", "").replace("'", "").replace("\\n", "") +
+                        str(description)
+                        .replace(")", "")
+                        .replace("(", "")
+                        .replace("]", "")
+                        .replace("[", "")
+                        .replace(",", "")
+                        .replace("'", "")
+                        .replace("\\n", "") +
                         '\n' + "**********************" + "\n" + "Параметры инструмента:" + "\n" +
-                        str(params).replace("[", "").replace("]", "").replace(")", "").replace("(", "").replace(",",
-                                                                                                                ""))
+                        str(params)
+                        .replace("[", "")
+                        .replace("]", "")
+                        .replace(")", "")
+                        .replace("(", "")
+                        .replace(",",
+                                 ""))
             text.configure(state=NORMAL)
     except TypeError:
         tkinter.messagebox.showwarning(title="Внимание", message="Ошибка доступа")
@@ -551,15 +581,19 @@ def getParamsInstrument(out1):
         tkinter.messagebox.showwarning(title="Внимание", message="Ошибка доступа")
 
 
-def addarticul(in1, in2, in3, in1name, in2name, in3name):
+def addarticul(in1, in2, in3, in1name, in3name):
+    idTypeList = []
+    idType = DBManage.findTypeFromName(in2)
+    for type in idType:
+        idTypeList.append(int(type[0]))
+
     if in1 == "" or in2 == "" or in3 == "":
         tkinter.messagebox.showwarning(title="Внимание", message="Нельзя создать пустой артикул")
         return False
     try:
-        if DBManage.addArticul(in1, in2, in3):
+        if DBManage.addArticul(in1, idTypeList[0], in3):
             tkinter.messagebox.showinfo(title="Успех", message="Артикул успешно добавлен")
             in1name.delete(0, END)
-            in2name.delete(0, END)
             in3name.delete(0, END)
     except (psycopg2.errors.ForeignKeyViolation, psycopg2.errors.UniqueViolation):
         tkinter.messagebox.showwarning(title="Внимание",
@@ -581,6 +615,27 @@ def fillOptionMenu3():
     return fill
 
 
+def sellerAdd(name, family, telephone, email, login, password, role, outchange1, outchange2, outchange3, outchange4,
+              outchange5, outchange6):
+    currRule = role \
+        .replace("(", "") \
+        .replace(")", "") \
+        .replace("'", "") \
+        .replace(",", "") \
+        .replace("_", "")
+    if name == '' or family == '' or telephone == '' or email == '' or login == '' or password == '' or role == '':
+        tkinter.messagebox.showwarning(title="Внимание", message="Нельзя добавить пустого сотрудника")
+        return False
+    DBManage.sellerAdd(name, family, telephone, email, login, password, currRule)
+    outchange1.delete(0, END)
+    outchange2.delete(0, END)
+    outchange3.delete(0, END)
+    outchange4.delete(0, END)
+    outchange5.delete(0, END)
+    outchange6.delete(0, END)
+    return True
+
+
 def widgets(frame0, frame1, frame2, frame3, frame4, frame5, frame6, frame7):
     # ..................................................................................Frame0
     text6 = Text(frame0, width=60, height=10)
@@ -592,7 +647,8 @@ def widgets(frame0, frame1, frame2, frame3, frame4, frame5, frame6, frame7):
                      command=lambda: takeid(entry1.get(), label1, label7, label8, label9))
     label1 = Label(frame1, width=30, height=1)
     entry1 = Entry(frame1, width=25)
-    label2 = Label(frame1, width=30, height=1, text="Введите id клиента для поиска")
+    label2 = Label(frame1, width=30, height=1, text="Введите email клиента для поиска")
+    entrydate = Entry(frame1, width=25)
     sep1 = ttk.Separator(frame1, orient="vertical")
     sep2 = ttk.Separator(frame1, orient="vertical")
     entry2 = Entry(frame1, width=60)
@@ -608,7 +664,8 @@ def widgets(frame0, frame1, frame2, frame3, frame4, frame5, frame6, frame7):
                      command=lambda: deleteClient(entry6.get(), entry6))
     button4 = Button(frame1, text="Рейтинг чеков клиентов", width=18, height=1, command=lambda: ratingcheque(text))
     button6 = Button(frame1, text="Сохранить данные в файл", width=23, height=1, command=lambda: saveRatingInFile(text))
-    button7 = Button(frame1, text="Получить всех клиентов", width=23, height=1, command=lambda: getIdClient(text2))
+    button7 = Button(frame1, text="Получить всех клиентов", width=23, height=1, command=lambda: getIdClient(text2,
+                                                                                                            entrydate.get()))
     label3 = Label(frame1, width=5, height=1, text="Имя", bg="gray22")
     label4 = Label(frame1, width=7, height=1, text="Фамилия", bg="gray22")
     label5 = Label(frame1, width=7, height=1, text="Телефон", bg="gray22")
@@ -619,9 +676,33 @@ def widgets(frame0, frame1, frame2, frame3, frame4, frame5, frame6, frame7):
     label10 = Label(frame1, width=35, height=1, text="Введите id клиента для его удаления из базы", bg="gray22")
     text = Text(frame1, width=40, height=10)
     text.tag_configure('bold', font='Helvetica 12 bold')
-    text2 = Text(frame1, width=40, height=10)
+    text2 = Text(frame1, width=43, height=10)
     text2.tag_configure('bold', font='Helvetica 12 bold')
     # .......................................................................................Frame1 end
+    # ........................................................................................Frame2
+    labelNameSeller = Label(frame2, width=10, height=1, text="Имя", bg="gray22")
+    labelFamilySeller = Label(frame2, width=10, height=1, text="Фамилия", bg="gray22")
+    labelTelephoneNumber = Label(frame2, width=10, height=1, bg="gray22", text="Телефон")
+    labelEmail = Label(frame2, width=10, height=1, text="Email", bg="gray22")
+    labelLogin = Label(frame2, width=10, height=1, text="Логин", bg="gray22")
+    labelPassword = Label(frame2, width=10, height=1, text="Пароль", bg="gray22")
+    labelRole = Label(frame2, width=10, height=1, text="Роль", bg="gray22")
+
+    EntryNameSeller = Entry(frame2, width=40)
+    EntryFamilySeller = Entry(frame2, width=40)
+    EntryTelephoneNumberSeller = Entry(frame2, width=40)
+    EntryEmailSeller = Entry(frame2, width=40)
+    EntryLoginSeller = Entry(frame2, width=40)
+    EntryPasswordSeller = Entry(frame2, width=40)
+    allRoles = DBManage.getAllRoles()
+    optionMenuSeller = StringVar()
+    OptionSeller = OptionMenu(frame2, optionMenuSeller, *allRoles)
+    registerButton = Button(frame2, text="Добавить аккаунт", width=18, height=1, command=lambda:
+    sellerAdd(EntryNameSeller.get(), EntryFamilySeller.get(), EntryTelephoneNumberSeller.get(),
+              EntryEmailSeller.get(), EntryLoginSeller.get(), EntryPasswordSeller.get(), optionMenuSeller.get(),
+              EntryNameSeller, EntryFamilySeller, EntryTelephoneNumberSeller, EntryEmailSeller,
+              EntryLoginSeller, EntryPasswordSeller))
+    # .......................................................................................Frame2 end
     # ........................................................................................Frame3
     text3 = Text(frame3, width=60, height=10)
     text3.configure(state=DISABLED)
@@ -723,14 +804,16 @@ def widgets(frame0, frame1, frame2, frame3, frame4, frame5, frame6, frame7):
                       command=lambda: getDictwithArticulInstrument(text9))
     button32 = Button(frame7, text="Получить ID параметров", width=39, command=lambda: getParamsInstrument(text9))
     entry18 = Entry(frame7, width=60)
-    entry19 = Entry(frame7, width=60)
+    fill = DBManage.getAllTypes()
+    optionMenuVar4 = StringVar()
+    OptionTypeInstrument4 = OptionMenu(frame7, optionMenuVar4, *fill)
     entry20 = Entry(frame7, width=60)
     label20 = Label(frame7, width=15, height=1, text="ID артикула", bg="gray22")
     label21 = Label(frame7, width=15, height=1, text="ID типа инструмента", bg="gray22")
     label22 = Label(frame7, width=15, height=1, text="Наименование", bg="gray22")
     button33 = Button(frame7, width=39, text="Зарегистрировать новый артикул",
-                      command=lambda: addarticul(entry18.get(), entry19.get(), entry20.get(),
-                                                 entry18, entry19, entry20))
+                      command=lambda: addarticul(entry18.get(), optionMenuVar4.get(), entry20.get(),
+                                                 entry18, entry20))
     button34 = Button(frame7, width=39, text="Свободный ID артикула", command=lambda: getEmptyArticulId(entry18))
     # .........................................................................................Frame7 end
     # Упаковка виджетов
@@ -761,6 +844,7 @@ def widgets(frame0, frame1, frame2, frame3, frame4, frame5, frame6, frame7):
     button4.place(x=25, y=380)
     button6.place(x=177, y=380)
     button7.place(x=500, y=380)
+    entrydate.place(x=685, y=380)
     button9.place(x=10, y=180)
     text4.place(x=10, y=300)
     entry7.place(x=10, y=470)
@@ -812,7 +896,7 @@ def widgets(frame0, frame1, frame2, frame3, frame4, frame5, frame6, frame7):
     button31.place(x=50, y=260)
     button32.place(x=50, y=290)
     entry18.place(x=500, y=50)
-    entry19.place(x=500, y=100)
+    OptionTypeInstrument4.place(x=500, y=100)
     entry20.place(x=500, y=150)
     label20.place(x=370, y=50)
     label21.place(x=370, y=100)
@@ -820,6 +904,23 @@ def widgets(frame0, frame1, frame2, frame3, frame4, frame5, frame6, frame7):
     button33.place(x=500, y=200)
     button34.place(x=500, y=230)
     OptionTypeInstrument2.place(x=500, y=50)
+
+    labelNameSeller.place(x=80, y=100)
+    labelFamilySeller.place(x=80, y=150)
+    labelTelephoneNumber.place(x=80, y=200)
+    labelEmail.place(x=80, y=250)
+    labelLogin.place(x=80, y=300)
+    labelPassword.place(x=80, y=350)
+    labelRole.place(x=80, y=400)
+
+    EntryNameSeller.place(x=150, y=100)
+    EntryFamilySeller.place(x=150, y=150)
+    EntryTelephoneNumberSeller.place(x=150, y=200)
+    EntryEmailSeller.place(x=150, y=250)
+    EntryLoginSeller.place(x=150, y=300)
+    EntryPasswordSeller.place(x=150, y=350)
+    OptionSeller.place(x=150, y=400)
+    registerButton.place(x=150, y=450)
 
 
 def showWindow():

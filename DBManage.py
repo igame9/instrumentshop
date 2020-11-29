@@ -135,14 +135,14 @@ def topCheque():
         return False
 
 
-def getListIdClient():
+def getListIdClient(timeanddate):
     ListId = []
     try:
         userRole = getRole(loginUser)
         conn = psycopg2.connect(dbname='InstrumentalMusic', user=userRole,
                                 password='9810', host='192.168.56.101', port='5432')
         cursor = conn.cursor()
-        cursor.callproc('idfromclient', [])  # пример вызова функции из БД , имя и параметр на вход
+        cursor.callproc('idfromclient', [timeanddate])  # пример вызова функции из БД , имя и параметр на вход
         data = cursor.fetchall()
         for data in data:
             ListId.append(data)
@@ -615,7 +615,7 @@ def getEmptyIdArticulInsturment():
         return False
 
 
-def getAllArticulsName(): # системная
+def getAllArticulsName():  # системная
     articulsName = []
     try:
         conn = psycopg2.connect(dbname='InstrumentalMusic', user="andrey",
@@ -635,7 +635,7 @@ def getAllArticulsName(): # системная
         return False
 
 
-def findArticulFromName(nameArticul): # системная
+def findArticulFromName(nameArticul):  # системная
     try:
         conn = psycopg2.connect(dbname='InstrumentalMusic', user="andrey",
                                 password='98106547', host='192.168.56.101', port='5432')
@@ -649,3 +649,83 @@ def findArticulFromName(nameArticul): # системная
     except (psycopg2.OperationalError, psycopg2.errors.InvalidTextRepresentation):
         tkinter.messagebox.showerror(title="Ошибка", message="Ошибка подключения к БД")
         return False
+
+
+def getAllTypes():  # системная
+    typesName = []
+    try:
+        conn = psycopg2.connect(dbname='InstrumentalMusic', user="andrey",
+                                password='98106547', host='192.168.56.101', port='5432')
+        cursor = conn.cursor()
+        cursor.callproc('getlalltypes', [])  # пример вызова функции из БД , имя и параметр на вход
+        alltypes = cursor.fetchall()
+        for type in alltypes:
+            typesName.append(str(type).replace("                ", "").replace("'", "").replace(",", "").
+                             replace("           ", "").replace(")", "").replace("(", ""))
+        cursor.close()
+        conn.commit()
+        conn.close()
+        return typesName
+    except (psycopg2.OperationalError, psycopg2.errors.InvalidTextRepresentation):
+        tkinter.messagebox.showerror(title="Ошибка", message="Ошибка подключения к БД")
+        return False
+
+
+def findTypeFromName(typeName):
+    try:
+        conn = psycopg2.connect(dbname='InstrumentalMusic', user="andrey",
+                                password='98106547', host='192.168.56.101', port='5432')
+        cursor = conn.cursor()
+        cursor.callproc('findidtypefromname', [typeName])  # пример вызова функции из БД , имя и параметр на вход
+        number = cursor.fetchall()
+        cursor.close()
+        conn.commit()
+        conn.close()
+        return number
+    except (psycopg2.OperationalError, psycopg2.errors.InvalidTextRepresentation):
+        tkinter.messagebox.showerror(title="Ошибка", message="Ошибка подключения к БД")
+        return False
+
+
+def getAllRoles():
+    allRoles = []
+    try:
+        conn = psycopg2.connect(dbname='InstrumentalMusic', user="andrey",
+                                password='98106547', host='192.168.56.101', port='5432')
+        cursor = conn.cursor()
+        cursor.callproc('getallroles', [])  # пример вызова функции из БД , имя и параметр на вход
+        roles = cursor.fetchall()
+        for role in roles:
+            allRoles.append(role)
+        cursor.close()
+        conn.commit()
+        conn.close()
+        return allRoles
+    except (psycopg2.OperationalError, psycopg2.errors.InvalidTextRepresentation):
+        tkinter.messagebox.showerror(title="Ошибка", message="Ошибка подключения к БД")
+        return False
+
+
+def sellerAdd(name, family, telephone, email, login, password, role):
+    userRole = getRole(loginUser)
+    try:
+        conn = psycopg2.connect(dbname='InstrumentalMusic', user=userRole,
+                                password='98106547', host='192.168.56.101', port='5432')
+        cursor = conn.cursor()
+        cursor.callproc('selleradd',
+                        [name, family, telephone, email, login, password,
+                         role])  # пример вызова функции из БД , имя и параметр на вход
+        cursor.close()
+        conn.commit()
+        conn.close()
+    except psycopg2.OperationalError:
+        tkinter.messagebox.showerror(title="Ошибка", message="Ошибка подключения к БД")
+        return False
+    except psycopg2.errors.InsufficientPrivilege:
+        tkinter.messagebox.showerror(title="Внимание", message="Ошибка доступа")
+        return False
+    except psycopg2.errors.InvalidTextRepresentation:
+        tkinter.messagebox.showerror(title="Внимание", message="Ошибка доступа")
+        return False
+    tkinter.messagebox.showinfo(title="Успех", message=" Продавец успешно добавлен в базу")
+    return True
