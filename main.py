@@ -53,7 +53,6 @@ def notebook(window):
     style.configure("1.TFrame", background="gray22")
     style.configure("2.TFrame", background="gray22")
     style.configure("3.TFrame", background="gray22")
-    style.configure("4.TFrame", background="gray22")
     style.configure("5.TFrame", background="gray22")
     style.configure("6.TFrame", background="gray22")
     style.configure("7.TFrame", background="gray22")
@@ -62,7 +61,6 @@ def notebook(window):
     frame1 = ttk.Frame(window, style="1.TFrame")
     frame2 = ttk.Frame(window, style="2.TFrame")
     frame3 = ttk.Frame(window, style="3.TFrame")
-    frame4 = ttk.Frame(window, style="4.TFrame")
     frame5 = ttk.Frame(window, style="5.TFrame")
     frame6 = ttk.Frame(window, style="6.TFrame")
     frame7 = ttk.Frame(window, style="7.TFrame")
@@ -70,19 +68,17 @@ def notebook(window):
     frame1.pack()
     frame2.pack()
     frame3.pack()
-    frame4.pack()
     frame5.pack()
     frame6.pack()
     frame7.pack()
     notebk.add(frame0, text="О тебе")
     notebk.add(frame1, text='Клиенты')
     notebk.add(frame2, text='Сотрудники')
-    notebk.add(frame3, text="Отдел пианино")
-    notebk.add(frame4, text="Отдел флейт")
+    notebk.add(frame3, text="Отдел инструментов")
     notebk.add(frame5, text="Отдел поставки")
     notebk.add(frame6, text="Склад")
     notebk.add(frame7, text="Справочник")
-    widgets(frame0, frame1, frame2, frame3, frame4, frame5, frame6, frame7)  # тут осторожнее
+    widgets(frame0, frame1, frame2, frame3, frame5, frame6, frame7)  # тут осторожнее
 
 
 def takeid(Email, out1, out2, out3, out4):
@@ -178,9 +174,9 @@ def getPianino(text):
     text.configure(state=NORMAL)
     text.delete(1.0, END)
     try:
-        listPianino = DBManage.getPianinoFromWarehouse()
-        for pianino in listPianino:
-            text.insert(END, str(pianino)
+        listInstrument = DBManage.getInstrumentFromWarehouse()
+        for instrument in listInstrument:
+            text.insert(END, str(instrument)
                         .replace(")", "")
                         .replace("(", "")
                         .replace(",", "")
@@ -189,6 +185,8 @@ def getPianino(text):
                         + '\n')
         text.configure(state=DISABLED)
     except TypeError:
+        tkinter.messagebox.showwarning(title="Внимание", message="Ошибка доступа")
+    except psycopg2.errors.InsufficientPrivilege:
         tkinter.messagebox.showwarning(title="Внимание", message="Ошибка доступа")
 
 
@@ -711,7 +709,7 @@ def saveChangeToSeller(name, family, telephone, email, login, password, role):
     DBManage.updateSeller(name, family, telephone, email, login, password, currRule)
 
 
-def widgets(frame0, frame1, frame2, frame3, frame4, frame5, frame6, frame7):
+def widgets(frame0, frame1, frame2, frame3, frame5, frame6, frame7):
     # ..................................................................................Frame0
     text6 = Text(frame0, width=60, height=10)
     text6.tag_configure('bold', font='CenturyGothic 16 bold')
@@ -797,12 +795,12 @@ def widgets(frame0, frame1, frame2, frame3, frame4, frame5, frame6, frame7):
 
     saveChangeSeller = Button(frame2, width=20, height=1, text="Сохранить изменения",
                               command=lambda: saveChangeToSeller(EntryNameSellerForChange.get(),
-                                                               EntryFamilySellerForChange.get(),
-                                                               EntryTelephoneNumberSellerForChange.get(),
-                                                               EntryEmailSellerForChange.get(),
-                                                               EntryLoginSellerForChange.get(),
-                                                               EntryPasswordSellerForChange.get(),
-                                                               optionMenuSellerForChange.get()))
+                                                                 EntryFamilySellerForChange.get(),
+                                                                 EntryTelephoneNumberSellerForChange.get(),
+                                                                 EntryEmailSellerForChange.get(),
+                                                                 EntryLoginSellerForChange.get(),
+                                                                 EntryPasswordSellerForChange.get(),
+                                                                 optionMenuSellerForChange.get()))
     allRoles = DBManage.getAllRoles()
     allRoles.pop(0)
     allRoles.pop(0)
@@ -825,15 +823,15 @@ def widgets(frame0, frame1, frame2, frame3, frame4, frame5, frame6, frame7):
     text3 = Text(frame3, width=60, height=10)
     text3.configure(state=DISABLED)
     text3.tag_configure('bold', font='Helvetica 12 bold')
-    button9 = Button(frame3, text="Получить все пианино со склада", width=25, height=1,
+    button9 = Button(frame3, text="Получить инструменты со склада", width=30, height=1,
                      command=lambda: getPianino(text3))
     text4 = Text(frame3, width=60, height=10)
     text4.configure(state=DISABLED)
     text4.tag_configure('bold', font='Helvetica 12 bold')
     entry7 = Entry(frame3, width=5)
-    button10 = Button(frame3, text="Получить описание пианино", width=25, height=1,
+    button10 = Button(frame3, text="Получить описание инструмента", width=25, height=1,
                       command=lambda: getDescriptionPiano(entry7.get(), text4))
-    button11 = Button(frame3, text="Добавить описание пианино", width=25, height=1,
+    button11 = Button(frame3, text="Добавить описание инструмента", width=25, height=1,
                       command=lambda: addDescription(entry7.get(), text4.get(1.0, END)))
     button12 = Button(frame3, text="Обновить описание", width=25, height=1,
                       command=lambda: updateDescription(text4.get(1.0, END), entry7.get()))

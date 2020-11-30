@@ -155,24 +155,42 @@ def getListIdClient(timeanddate):
         return False
 
 
-def getPianinoFromWarehouse():
-    listPianino = []
-    try:
-        userRole = getRole(loginUser)
-        conn = psycopg2.connect(dbname='InstrumentalMusic', user=userRole,
-                                password='98106547', host='192.168.56.101', port='5432')
-        cursor = conn.cursor()
-        cursor.callproc('getpianofromwarehouse', [])  # пример вызова функции из БД , имя и параметр на вход
-        data = cursor.fetchall()
-        for data in data:
-            listPianino.append(data)
-        cursor.close()
-        conn.commit()
-        conn.close()
-        return listPianino
-    except (psycopg2.OperationalError, psycopg2.errors.InvalidTextRepresentation):
-        tkinter.messagebox.showerror(title="Ошибка", message="Ошибка подключения к БД")
-        return False
+def getInstrumentFromWarehouse():
+    userRole = getRole(loginUser)
+    listInstrument = []
+    if userRole == 'sellerpiano':
+        try:
+            conn = psycopg2.connect(dbname='InstrumentalMusic', user=userRole,
+                                    password='98106547', host='192.168.56.101', port='5432')
+            cursor = conn.cursor()
+            cursor.callproc('getpianofromwarehouse', [])  # пример вызова функции из БД , имя и параметр на вход
+            data = cursor.fetchall()
+            for data in data:
+                listInstrument.append(data)
+            cursor.close()
+            conn.commit()
+            conn.close()
+            return listInstrument
+        except (psycopg2.OperationalError, psycopg2.errors.InvalidTextRepresentation):
+            tkinter.messagebox.showerror(title="Ошибка", message="Ошибка подключения к БД")
+            return False
+
+    elif userRole == 'sellerflute':
+        try:
+            conn = psycopg2.connect(dbname='InstrumentalMusic', user='seller_flute',
+                                    password='98106547', host='192.168.56.101', port='5432')
+            cursor = conn.cursor()
+            cursor.callproc('getflutefromwarehouse', [])  # пример вызова функции из БД , имя и параметр на вход
+            data = cursor.fetchall()
+            for data in data:
+                listInstrument.append(data)
+            cursor.close()
+            conn.commit()
+            conn.close()
+            return listInstrument
+        except (psycopg2.OperationalError, psycopg2.errors.InvalidTextRepresentation):
+            tkinter.messagebox.showerror(title="Ошибка", message="Ошибка подключения к БД")
+            return False
 
 
 def getDescriptionPiano(id):
