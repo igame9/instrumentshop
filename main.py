@@ -86,7 +86,6 @@ def notebook(window):
 
 
 def takeid(Email, out1, out2, out3, out4):
-    print(Email)
     name = DBManage.selectClientName(Email)
     if name == 0:
         name = ""
@@ -319,7 +318,7 @@ def getOptionMenuValue(selection):
 
 
 def addInformSupply(in1, in2, optionMenuValue, in1name, in2name):
-    optionVal = optionMenuValue
+    optionVal = optionMenuValue  # тут пробный вариант, можно заменить на функцию из бд по поиску id по наименованию
     in3 = 0
     if optionVal == "Гитара":
         in3 = 1
@@ -636,6 +635,82 @@ def sellerAdd(name, family, telephone, email, login, password, role, outchange1,
     return True
 
 
+def getSellerByEmails(email, out1, out2, out3, out4, out5, out6, out7):
+    out1.configure(state=NORMAL)
+    out2.configure(state=NORMAL)
+    out3.configure(state=NORMAL)
+    out4.configure(state=NORMAL)
+    out5.configure(state=NORMAL)
+    out6.configure(state=NORMAL)
+
+    out1.delete(0, END)
+    out2.delete(0, END)
+    out3.delete(0, END)
+    out4.delete(0, END)
+    out5.delete(0, END)
+    out6.delete(0, END)
+
+    seller = DBManage.selectSellerByEmail(email)
+    if seller == 0:
+        seller = ""
+    if seller == "" or seller == []:
+        tkinter.messagebox.showinfo(title="Внимание", message="Данные не найдены")
+        out1.delete(0, END)
+        out2.delete(0, END)
+        out3.delete(0, END)
+        out4.delete(0, END)
+        out5.delete(0, END)
+        out6.delete(0, END)
+
+        out1.insert(0, "Данные не найдены")
+        out2.insert(0, "")
+        out3.insert(0, "")
+        out4.insert(0, "")
+        out5.insert(0, "")
+        out6.insert(0, "")
+        out1.configure(state=DISABLED)
+        out2.configure(state=DISABLED)
+        out3.configure(state=DISABLED)
+        out4.configure(state=DISABLED)
+        out5.configure(state=DISABLED)
+        out6.configure(state=DISABLED)
+        return False
+    out1.insert(0, seller[0])
+    out2.insert(0, seller[1])
+    out3.insert(0, seller[2])
+    out4.insert(0, seller[3])
+    out5.insert(0, seller[4])
+    out6.insert(0, seller[5])
+    out7.set(seller[6])
+
+    out1.configure(state=DISABLED)
+    out2.configure(state=DISABLED)
+    out3.configure(state=DISABLED)
+    out4.configure(state=DISABLED)
+    out5.configure(state=DISABLED)
+    out6.configure(state=DISABLED)
+    tkinter.messagebox.showinfo(title="Успех", message="Данные найдены")
+
+
+def onToEdits(out1, out2, out3, out4, out5, out6):
+    out1.configure(state=NORMAL)
+    out2.configure(state=NORMAL)
+    out3.configure(state=NORMAL)
+    out4.configure(state=NORMAL)
+    out5.configure(state=NORMAL)
+    out6.configure(state=NORMAL)
+
+
+def saveChangeToSeller(name, family, telephone, email, login, password, role):
+    currRule = role \
+        .replace("(", "") \
+        .replace(")", "") \
+        .replace("'", "") \
+        .replace(",", "") \
+        .replace("_", "")
+    DBManage.updateSeller(name, family, telephone, email, login, password, currRule)
+
+
 def widgets(frame0, frame1, frame2, frame3, frame4, frame5, frame6, frame7):
     # ..................................................................................Frame0
     text6 = Text(frame0, width=60, height=10)
@@ -694,14 +769,57 @@ def widgets(frame0, frame1, frame2, frame3, frame4, frame5, frame6, frame7):
     EntryEmailSeller = Entry(frame2, width=40)
     EntryLoginSeller = Entry(frame2, width=40)
     EntryPasswordSeller = Entry(frame2, width=40)
+
+    EntryNameSellerForChange = Entry(frame2, width=40)
+    EntryNameSellerForChange.configure(state=DISABLED)
+    EntryFamilySellerForChange = Entry(frame2, width=40)
+    EntryFamilySellerForChange.configure(state=DISABLED)
+    EntryTelephoneNumberSellerForChange = Entry(frame2, width=40)
+    EntryTelephoneNumberSellerForChange.configure(state=DISABLED)
+    EntryEmailSellerForChange = Entry(frame2, width=40)
+    EntryEmailSellerForChange.configure(state=DISABLED)
+    EntryLoginSellerForChange = Entry(frame2, width=40)
+    EntryLoginSellerForChange.configure(state=DISABLED)
+    EntryPasswordSellerForChange = Entry(frame2, width=40)
+    EntryPasswordSellerForChange.configure(state=DISABLED)
+    getSellerByEmail = Button(frame2, width=25, height=1, text="Получить сотрудника по Email",
+                              command=lambda: getSellerByEmails
+                              (EntryEmailSellerForFind.get(), EntryNameSellerForChange,
+                               EntryFamilySellerForChange, EntryTelephoneNumberSellerForChange,
+                               EntryEmailSellerForChange, EntryLoginSellerForChange,
+                               EntryPasswordSellerForChange, optionMenuSellerForChange))
+    EntryEmailSellerForFind = Entry(frame2, width=40)
+    onToEdit = Button(frame2, width=20, height=1, text="Редактировать",
+                      command=lambda: onToEdits(EntryNameSellerForChange,
+                                                EntryFamilySellerForChange, EntryTelephoneNumberSellerForChange,
+                                                EntryEmailSellerForChange, EntryLoginSellerForChange,
+                                                EntryPasswordSellerForChange))
+
+    saveChangeSeller = Button(frame2, width=20, height=1, text="Сохранить изменения",
+                              command=lambda: saveChangeToSeller(EntryNameSellerForChange.get(),
+                                                               EntryFamilySellerForChange.get(),
+                                                               EntryTelephoneNumberSellerForChange.get(),
+                                                               EntryEmailSellerForChange.get(),
+                                                               EntryLoginSellerForChange.get(),
+                                                               EntryPasswordSellerForChange.get(),
+                                                               optionMenuSellerForChange.get()))
     allRoles = DBManage.getAllRoles()
+    allRoles.pop(0)
+    allRoles.pop(0)
     optionMenuSeller = StringVar()
     OptionSeller = OptionMenu(frame2, optionMenuSeller, *allRoles)
+
+    optionMenuSellerForChange = StringVar()
+    OptionRoleForChange = OptionMenu(frame2, optionMenuSellerForChange, *allRoles)
+
     registerButton = Button(frame2, text="Добавить аккаунт", width=18, height=1, command=lambda:
     sellerAdd(EntryNameSeller.get(), EntryFamilySeller.get(), EntryTelephoneNumberSeller.get(),
               EntryEmailSeller.get(), EntryLoginSeller.get(), EntryPasswordSeller.get(), optionMenuSeller.get(),
               EntryNameSeller, EntryFamilySeller, EntryTelephoneNumberSeller, EntryEmailSeller,
               EntryLoginSeller, EntryPasswordSeller))
+    labelResiterNewSeller = Label(frame2, width=30, height=1, text="Регистрация нового сотрудника", bg="gray22")
+
+    labelBlanSeller = Label(frame2, width=30, height=1, text="Анкеты сотрудников", bg="gray22")
     # .......................................................................................Frame2 end
     # ........................................................................................Frame3
     text3 = Text(frame3, width=60, height=10)
@@ -913,6 +1031,7 @@ def widgets(frame0, frame1, frame2, frame3, frame4, frame5, frame6, frame7):
     labelPassword.place(x=80, y=350)
     labelRole.place(x=80, y=400)
 
+    labelResiterNewSeller.place(x=150, y=50)
     EntryNameSeller.place(x=150, y=100)
     EntryFamilySeller.place(x=150, y=150)
     EntryTelephoneNumberSeller.place(x=150, y=200)
@@ -921,6 +1040,19 @@ def widgets(frame0, frame1, frame2, frame3, frame4, frame5, frame6, frame7):
     EntryPasswordSeller.place(x=150, y=350)
     OptionSeller.place(x=150, y=400)
     registerButton.place(x=150, y=450)
+
+    labelBlanSeller.place(x=450, y=50)
+    EntryNameSellerForChange.place(x=450, y=100)
+    EntryFamilySellerForChange.place(x=450, y=150)
+    EntryTelephoneNumberSellerForChange.place(x=450, y=200)
+    EntryEmailSellerForChange.place(x=450, y=250)
+    EntryLoginSellerForChange.place(x=450, y=300)
+    EntryPasswordSellerForChange.place(x=450, y=350)
+    OptionRoleForChange.place(x=450, y=400)
+    EntryEmailSellerForFind.place(x=550, y=400)
+    getSellerByEmail.place(x=450, y=450)
+    onToEdit.place(x=650, y=450)
+    saveChangeSeller.place(x=650, y=500)
 
 
 def showWindow():

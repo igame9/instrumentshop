@@ -729,3 +729,63 @@ def sellerAdd(name, family, telephone, email, login, password, role):
         return False
     tkinter.messagebox.showinfo(title="Успех", message=" Продавец успешно добавлен в базу")
     return True
+
+
+def selectSellerByEmail(email):
+    userRole = getRole(loginUser)
+    sellerList = []
+    try:
+        conn = psycopg2.connect(dbname='InstrumentalMusic', user=userRole,
+                                password='98106547', host='192.168.56.101', port='5432')
+        cursor = conn.cursor()
+        cursor.callproc('getsellerbyemail',
+                        [email])  # пример вызова функции из БД , имя и параметр на вход
+        seller = cursor.fetchall()
+        for param in seller:
+            name = param[0]
+            family = param[1]
+            telephone = param[2]
+            email = param[3]
+            login = param[4]
+            password = param[5]
+            role = param[6]
+            sellerList.append(name)
+            sellerList.append(family)
+            sellerList.append(telephone)
+            sellerList.append(email)
+            sellerList.append(login)
+            sellerList.append(password)
+            sellerList.append(role)
+        cursor.close()
+        conn.commit()
+        conn.close()
+        return sellerList
+    except psycopg2.OperationalError:
+        tkinter.messagebox.showerror(title="Ошибка", message="Ошибка подключения к БД")
+        return False
+    except psycopg2.errors.InsufficientPrivilege:
+        tkinter.messagebox.showerror(title="Внимание", message="Ошибка доступа")
+        return False
+    except psycopg2.errors.InvalidTextRepresentation:
+        tkinter.messagebox.showerror(title="Внимание", message="Ошибка доступа")
+        return False
+
+
+def updateSeller(name, family, telephonenumber, email, login, password, role):
+    userRole = getRole(loginUser)
+    try:
+        conn = psycopg2.connect(dbname='InstrumentalMusic', user=userRole,
+                                password='98106547', host='192.168.56.101', port='5432')
+        cursor = conn.cursor()
+        cursor.callproc('updateseller',
+                        [name, family, telephonenumber, email, login, password,
+                         role])  # пример вызова функции из БД , имя и параметр на вход
+        cursor.close()
+        conn.commit()
+        conn.close()
+    except (psycopg2.OperationalError, psycopg2.errors.InvalidTextRepresentation, psycopg2.errors.UniqueViolation):
+        tkinter.messagebox.showerror(title="Ошибка",
+                                     message="Ошибка подключения к БД")
+        return False
+    tkinter.messagebox.showinfo(title="Успех", message="Изменение сохранены")
+    return True
