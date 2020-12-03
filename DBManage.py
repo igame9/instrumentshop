@@ -1,6 +1,8 @@
 import psycopg2
 import tkinter.messagebox
 
+import connectionParams
+
 loginUser = ''  # тут хранится логин пользователя, получаемый из функции main.auth()
 
 
@@ -8,8 +10,8 @@ def selectClientName(Email):  # функция достать клиента п�
     client = []
     userRole = getRole(loginUser)
     try:
-        conn = psycopg2.connect(dbname='InstrumentalMusic', user=userRole,
-                                password='9810', host='192.168.56.101', port='5432')
+        conn = psycopg2.connect(dbname=connectionParams.dbName, user=userRole,
+                                password='9810', host=connectionParams.host, port=connectionParams.host)
         cursor = conn.cursor()
         cursor.callproc('getclientbyemail', [Email])  # пример вызова функции из БД , имя и параметр на вход
         data = cursor.fetchall()  # возвращает список всех строк, полученных из запроса
@@ -33,8 +35,8 @@ def selectClientName(Email):  # функция достать клиента п�
 
 def testConn():
     try:
-        conn = psycopg2.connect(dbname='InstrumentalMusic', user='andrey',
-                                password='98106547', host='192.168.56.101', port='5432')
+        conn = psycopg2.connect(dbname=connectionParams.dbName, user='andrey',
+                                password='98106547', host=connectionParams.host, port=connectionParams.port)
     except psycopg2.OperationalError:
         return False
     return True
@@ -43,8 +45,8 @@ def testConn():
 def clientAdd(name, family, telephone, email):
     userRole = getRole(loginUser)
     try:
-        conn = psycopg2.connect(dbname='InstrumentalMusic', user=userRole,
-                                password='9810', host='192.168.56.101', port='5432')
+        conn = psycopg2.connect(dbname=connectionParams.dbName, user=userRole,
+                                password='9810', host=connectionParams.host, port=connectionParams.port)
         cursor = conn.cursor()
         cursor.callproc('clientadd',
                         [name, family, telephone, email])  # пример вызова функции из БД , имя и параметр на вход
@@ -60,8 +62,8 @@ def clientAdd(name, family, telephone, email):
 
 def checkUser(name, family):
     try:
-        conn = psycopg2.connect(dbname='InstrumentalMusic', user='andrey',
-                                password='98106547', host='192.168.56.101', port='5432')
+        conn = psycopg2.connect(dbname=connectionParams.dbName, user='andrey',
+                                password='98106547', host=connectionParams.host, port=connectionParams.port)
         cursor = conn.cursor()
         cursor.callproc('checkuser', [name, family])  # пример вызова функции из БД , имя и параметр на вход
         data = cursor.fetchall()  # возвращает список всех строк, полученных из запроса
@@ -78,8 +80,8 @@ def checkUser(name, family):
 
 def getRole(login):
     try:
-        conn = psycopg2.connect(dbname='InstrumentalMusic', user='andrey',
-                                password='98106547', host='192.168.56.101', port='5432')
+        conn = psycopg2.connect(dbname=connectionParams.dbName, user='andrey',
+                                password='98106547', host=connectionParams.host, port=connectionParams.port)
         cursor = conn.cursor()
         cursor.callproc('getrole', [login])  # пример вызова функции из БД , имя и параметр на вход
         role = cursor.fetchall()
@@ -97,8 +99,8 @@ def deleteClient(id):
     userRole = getRole(loginUser)
     inform = []
     try:
-        conn = psycopg2.connect(dbname='InstrumentalMusic', user=userRole,
-                                password='9810', host='192.168.56.101', port='5432')
+        conn = psycopg2.connect(dbname=connectionParams.dbName, user=userRole,
+                                password='9810', host=connectionParams.host, port=connectionParams.port)
         cursor = conn.cursor()
         cursor.callproc('checkdelete', [id])  # пример вызова функции из БД , имя и параметр на вход
         info = cursor.fetchall()
@@ -119,8 +121,8 @@ def topCheque():
     rating = []
     try:
         userRole = getRole(loginUser)
-        conn = psycopg2.connect(dbname='InstrumentalMusic', user=userRole,
-                                password='9810', host='192.168.56.101', port='5432')
+        conn = psycopg2.connect(dbname=connectionParams.dbName, user=userRole,
+                                password='9810', host=connectionParams.host, port=connectionParams.port)
         cursor = conn.cursor()
         cursor.callproc('topcheque', [])  # пример вызова функции из БД , имя и параметр на вход
         data = cursor.fetchall()
@@ -139,8 +141,8 @@ def getListIdClient(timeanddate):
     ListId = []
     try:
         userRole = getRole(loginUser)
-        conn = psycopg2.connect(dbname='InstrumentalMusic', user=userRole,
-                                password='9810', host='192.168.56.101', port='5432')
+        conn = psycopg2.connect(dbname=connectionParams.dbName, user=userRole,
+                                password='9810', host=connectionParams.host, port=connectionParams.port)
         cursor = conn.cursor()
         cursor.callproc('idfromclient', [timeanddate])  # пример вызова функции из БД , имя и параметр на вход
         data = cursor.fetchall()
@@ -160,8 +162,8 @@ def getInstrumentFromWarehouse():
     listInstrument = []
     if userRole == 'sellerpiano':
         try:
-            conn = psycopg2.connect(dbname='InstrumentalMusic', user=userRole,
-                                    password='98106547', host='192.168.56.101', port='5432')
+            conn = psycopg2.connect(dbname=connectionParams.dbName, user=userRole,
+                                    password='98106547', host=connectionParams.host, port=connectionParams.port)
             cursor = conn.cursor()
             cursor.callproc('getpianofromwarehouse', [])  # пример вызова функции из БД , имя и параметр на вход
             data = cursor.fetchall()
@@ -177,8 +179,8 @@ def getInstrumentFromWarehouse():
 
     elif userRole == 'sellerflute':
         try:
-            conn = psycopg2.connect(dbname='InstrumentalMusic', user='seller_flute',
-                                    password='98106547', host='192.168.56.101', port='5432')
+            conn = psycopg2.connect(dbname=connectionParams.dbName, user='seller_flute',
+                                    password='98106547', host=connectionParams.host, port=connectionParams.port)
             cursor = conn.cursor()
             cursor.callproc('getflutefromwarehouse', [])  # пример вызова функции из БД , имя и параметр на вход
             data = cursor.fetchall()
@@ -192,30 +194,121 @@ def getInstrumentFromWarehouse():
             tkinter.messagebox.showerror(title="Ошибка", message="Ошибка подключения к БД")
             return False
 
+    elif userRole == 'sellerguitar':
+        try:
+            conn = psycopg2.connect(dbname=connectionParams.dbName, user=userRole,
+                                    password='98106547', host=connectionParams.host, port=connectionParams.port)
+            cursor = conn.cursor()
+            cursor.callproc('getguitarfromwarehouse', [])  # пример вызова функции из БД , имя и параметр на вход
+            data = cursor.fetchall()
+            for data in data:
+                listInstrument.append(data)
+            cursor.close()
+            conn.commit()
+            conn.close()
+            return listInstrument
+        except (psycopg2.OperationalError, psycopg2.errors.InvalidTextRepresentation):
+            tkinter.messagebox.showerror(title="Ошибка", message="Ошибка подключения к БД")
+            return False
+
+    elif userRole == 'andrey':
+        try:
+            conn = psycopg2.connect(dbname=connectionParams.dbName, user=userRole,
+                                    password='98106547', host=connectionParams.host, port=connectionParams.port)
+            cursor = conn.cursor()
+            cursor.callproc('getpianofromwarehouse', [])  # пример вызова функции из БД , имя и параметр на вход
+            data = cursor.fetchall()
+            for data in data:
+                listInstrument.append(data)
+            cursor.close()
+            conn.commit()
+            conn.close()
+            return listInstrument
+        except (psycopg2.OperationalError, psycopg2.errors.InvalidTextRepresentation):
+            tkinter.messagebox.showerror(title="Ошибка", message="Ошибка подключения к БД")
+            return False
+
 
 def getDescriptionPiano(id):
-    try:
-        userRole = getRole(loginUser)
-        conn = psycopg2.connect(dbname='InstrumentalMusic', user=userRole,
-                                password='98106547', host='192.168.56.101', port='5432')
-        cursor = conn.cursor()
-        cursor.callproc('getdescriptionpiano', [id])  # пример вызова функции из БД , имя и параметр на вход
-        data = cursor.fetchall()
-        cursor.close()
-        conn.commit()
-        conn.close()
-        return data
-    except (psycopg2.OperationalError, psycopg2.errors.InvalidTextRepresentation):
-        tkinter.messagebox.showerror(title="Ошибка", message="Ошибка подключения к БД")
-        return False
+    userRole = getRole(loginUser)
+    if userRole == 'sellerpiano':
+        try:
+            conn = psycopg2.connect(dbname=connectionParams.dbName, user=userRole,
+                                    password='98106547', host=connectionParams.host, port=connectionParams.port)
+            cursor = conn.cursor()
+            cursor.callproc('getdescriptionpiano', [id])  # пример вызова функции из БД , имя и параметр на вход
+            data = cursor.fetchall()
+            cursor.close()
+            conn.commit()
+            conn.close()
+            return data
+        except (psycopg2.OperationalError, psycopg2.errors.InvalidTextRepresentation):
+            tkinter.messagebox.showerror(title="Ошибка", message="Ошибка подключения к БД")
+            return False
+        except psycopg2.errors.RaiseException:
+            tkinter.messagebox.showerror(title="Ошибка", message="Неправомерный доступ")
+            return False
+
+    elif userRole == 'sellerflute':
+        userRole = 'seller_flute'
+        try:
+            conn = psycopg2.connect(dbname=connectionParams.dbName, user=userRole,
+                                    password='98106547', host=connectionParams.host, port=connectionParams.port)
+            cursor = conn.cursor()
+            cursor.callproc('getdescriptionflute', [id])  # пример вызова функции из БД , имя и параметр на вход
+            data = cursor.fetchall()
+            cursor.close()
+            conn.commit()
+            conn.close()
+            return data
+        except (psycopg2.OperationalError, psycopg2.errors.InvalidTextRepresentation):
+            tkinter.messagebox.showerror(title="Ошибка", message="Ошибка подключения к БД")
+            return False
+        except psycopg2.errors.RaiseException:
+            tkinter.messagebox.showerror(title="Ошибка", message="Неправомерный доступ")
+            return False
+
+    elif userRole == 'andrey':
+        try:
+            conn = psycopg2.connect(dbname=connectionParams.dbName, user=userRole,
+                                    password='98106547', host=connectionParams.host, port=connectionParams.port)
+            cursor = conn.cursor()
+            cursor.callproc('getdescriptionpiano', [id])  # пример вызова функции из БД , имя и параметр на вход
+            data = cursor.fetchall()
+            cursor.close()
+            conn.commit()
+            conn.close()
+            return data
+        except (psycopg2.OperationalError, psycopg2.errors.InvalidTextRepresentation):
+            tkinter.messagebox.showerror(title="Ошибка", message="Ошибка подключения к БД")
+            return False
+
+    elif userRole == 'sellerguitar':
+        try:
+            conn = psycopg2.connect(dbname=connectionParams.dbName, user=userRole,
+                                    password='98106547', host=connectionParams.host, port=connectionParams.port)
+            cursor = conn.cursor()
+            cursor.callproc('getdescriptionguitar', [id])  # пример вызова функции из БД , имя и параметр на вход
+            data = cursor.fetchall()
+            cursor.close()
+            conn.commit()
+            conn.close()
+            return data
+        except (psycopg2.OperationalError, psycopg2.errors.InvalidTextRepresentation):
+            tkinter.messagebox.showerror(title="Ошибка", message="Ошибка подключения к БД")
+            return False
+        except psycopg2.errors.RaiseException:
+            tkinter.messagebox.showerror(title="Ошибка", message="Неправомерный доступ")
+            return False
 
 
 def addDescription(idd, text):
     userRole = getRole(loginUser)
+    if userRole == 'sellerflute':
+        userRole = 'seller_flute'
     try:
-        conn = psycopg2.connect(dbname='InstrumentalMusic', user=userRole,
-
-                                password='98106547', host='192.168.56.101', port='5432')
+        conn = psycopg2.connect(dbname=connectionParams.dbName, user=userRole,
+                                password='98106547', host=connectionParams.host, port=connectionParams.port)
         cursor = conn.cursor()
         cursor.callproc('descriptionadd',
                         [idd, text])  # пример вызова функции из БД , имя и параметр на вход
@@ -232,10 +325,11 @@ def addDescription(idd, text):
 
 def updateDescription(text, id):
     userRole = getRole(loginUser)
+    if userRole == 'sellerflute':
+        userRole = 'seller_flute'
     try:
-        conn = psycopg2.connect(dbname='InstrumentalMusic', user=userRole,
-
-                                password='98106547', host='192.168.56.101', port='5432')
+        conn = psycopg2.connect(dbname=connectionParams.dbName, user=userRole,
+                                password='98106547', host=connectionParams.host, port=connectionParams.port)
         cursor = conn.cursor()
         cursor.callproc('updatedescription',
                         [text, id])  # пример вызова функции из БД , имя и параметр на вход
@@ -250,28 +344,27 @@ def updateDescription(text, id):
     return True
 
 
-def getPianoParams(id):
-    try:
-        userRole = getRole(loginUser)
-        conn = psycopg2.connect(dbname='InstrumentalMusic', user=userRole,
-                                password='98106547', host='192.168.56.101', port='5432')
-        cursor = conn.cursor()
-        cursor.callproc('getparampiano', [id])  # пример вызова функции из БД , имя и параметр на вход
-        data = cursor.fetchall()
-        cursor.close()
-        conn.commit()
-        conn.close()
-        return data
-    except (psycopg2.OperationalError, psycopg2.errors.InvalidTextRepresentation):
-        tkinter.messagebox.showerror(title="Ошибка", message="Ошибка подключения к БД")
-        return False
+def getInstrumentParams(id):
+    userRole = getRole(loginUser)
+    if userRole == 'sellerflute':
+        userRole = 'seller_flute'
+
+    conn = psycopg2.connect(dbname=connectionParams.dbName, user=userRole,
+                            password='98106547', host=connectionParams.host, port=connectionParams.port)
+    cursor = conn.cursor()
+    cursor.callproc('getparaminstrument', [id])  # пример вызова функции из БД , имя и параметр на вход
+    data = cursor.fetchall()
+    cursor.close()
+    conn.commit()
+    conn.close()
+    return data
 
 
 def getInfoAboutYou(login):
     try:
         userInfo = []
-        conn = psycopg2.connect(dbname='InstrumentalMusic', user='andrey',
-                                password='98106547', host='192.168.56.101', port='5432')
+        conn = psycopg2.connect(dbname=connectionParams.dbName, user='andrey',
+                                password='98106547', host=connectionParams.host, port=connectionParams.port)
         cursor = conn.cursor()
         cursor.callproc('getinfoaboutyou', [login])  # пример вызова функции из БД , имя и параметр на вход
         data = cursor.fetchall()
@@ -296,8 +389,8 @@ def getInfoAboutYou(login):
 def getSupplyinfo():
     try:
         userRole = getRole(loginUser)
-        conn = psycopg2.connect(dbname='InstrumentalMusic', user=userRole,
-                                password='98106547', host='192.168.56.101', port='5432')
+        conn = psycopg2.connect(dbname=connectionParams.dbName, user=userRole,
+                                password='98106547', host=connectionParams.host, port=connectionParams.port)
         cursor = conn.cursor()
         cursor.callproc('getsupplyinfo', [])  # пример вызова функции из БД , имя и параметр на вход
         data = cursor.fetchall()
@@ -313,8 +406,8 @@ def getSupplyinfo():
 def addSupply(idsupply, date):
     try:
         userRole = getRole(loginUser)
-        conn = psycopg2.connect(dbname='InstrumentalMusic', user=userRole,
-                                password='98106547', host='192.168.56.101', port='5432')
+        conn = psycopg2.connect(dbname=connectionParams.dbName, user=userRole,
+                                password='98106547', host=connectionParams.host, port=connectionParams.port)
         cursor = conn.cursor()
         cursor.callproc('addsupply',
                         [idsupply, date])  # пример вызова функции из БД , имя и параметр на вход
@@ -330,8 +423,8 @@ def addSupply(idsupply, date):
 def addInformSupply(supplycode, instrumentid, idtype):
     try:
         userRole = getRole(loginUser)
-        conn = psycopg2.connect(dbname='InstrumentalMusic', user=userRole,
-                                password='98106547', host='192.168.56.101', port='5432')
+        conn = psycopg2.connect(dbname=connectionParams.dbName, user=userRole,
+                                password='98106547', host=connectionParams.host, port=connectionParams.port)
         cursor = conn.cursor()
         cursor.callproc('addinformsupply',
                         [supplycode, instrumentid, idtype])  # пример вызова функции из БД , имя и параметр на вход
@@ -347,8 +440,8 @@ def addInformSupply(supplycode, instrumentid, idtype):
 def getEmptyNumberOfSupply():
     try:
         userRole = getRole(loginUser)
-        conn = psycopg2.connect(dbname='InstrumentalMusic', user=userRole,
-                                password='98106547', host='192.168.56.101', port='5432')
+        conn = psycopg2.connect(dbname=connectionParams.dbName, user=userRole,
+                                password='98106547', host=connectionParams.host, port=connectionParams.port)
         cursor = conn.cursor()
         cursor.callproc('getemptynumberofsupply', [])  # пример вызова функции из БД , имя и параметр на вход
         number = cursor.fetchall()
@@ -364,8 +457,8 @@ def getEmptyNumberOfSupply():
 def getEmptyNumberOfInstrument():
     try:
         userRole = getRole(loginUser)
-        conn = psycopg2.connect(dbname='InstrumentalMusic', user=userRole,
-                                password='98106547', host='192.168.56.101', port='5432')
+        conn = psycopg2.connect(dbname=connectionParams.dbName, user=userRole,
+                                password='98106547', host=connectionParams.host, port=connectionParams.port)
         cursor = conn.cursor()
         cursor.callproc('getemptynumberofinstrument', [])  # пример вызова функции из БД , имя и параметр на вход
         number = cursor.fetchall()
@@ -381,8 +474,8 @@ def getEmptyNumberOfInstrument():
 def getSupplyFromId(id):
     try:
         userRole = getRole(loginUser)
-        conn = psycopg2.connect(dbname='InstrumentalMusic', user=userRole,
-                                password='98106547', host='192.168.56.101', port='5432')
+        conn = psycopg2.connect(dbname=connectionParams.dbName, user=userRole,
+                                password='98106547', host=connectionParams.host, port=connectionParams.port)
         cursor = conn.cursor()
         cursor.callproc('getsupplyfromid', [id])  # пример вызова функции из БД , имя и параметр на вход
         data = cursor.fetchall()
@@ -398,8 +491,8 @@ def getSupplyFromId(id):
 def getEmptyCellOnPianoWarehouse():
     try:
         userRole = getRole(loginUser)
-        conn = psycopg2.connect(dbname='InstrumentalMusic', user=userRole,
-                                password='98106547', host='192.168.56.101', port='5432')
+        conn = psycopg2.connect(dbname=connectionParams.dbName, user=userRole,
+                                password='98106547', host=connectionParams.host, port=connectionParams.port)
         cursor = conn.cursor()
         cursor.callproc('emptycellonpianowarehouse', [])  # пример вызова функции из БД , имя и параметр на вход
         number = cursor.fetchall()
@@ -415,8 +508,8 @@ def getEmptyCellOnPianoWarehouse():
 def getUnregisteredPianoOnWarehouse():
     try:
         userRole = getRole(loginUser)
-        conn = psycopg2.connect(dbname='InstrumentalMusic', user=userRole,
-                                password='98106547', host='192.168.56.101', port='5432')
+        conn = psycopg2.connect(dbname=connectionParams.dbName, user=userRole,
+                                password='98106547', host=connectionParams.host, port=connectionParams.port)
         cursor = conn.cursor()
         cursor.callproc('unregisteredpianoinwarehouse', [])  # пример вызова функции из БД , имя и параметр на вход
         number = cursor.fetchall()
@@ -432,8 +525,8 @@ def getUnregisteredPianoOnWarehouse():
 def registerInstrumentInWarehouse(idtype, instrumentid, storagecell, idarticul):
     try:
         userRole = getRole(loginUser)
-        conn = psycopg2.connect(dbname='InstrumentalMusic', user=userRole,
-                                password='98106547', host='192.168.56.101', port='5432')
+        conn = psycopg2.connect(dbname=connectionParams.dbName, user=userRole,
+                                password='98106547', host=connectionParams.host, port=connectionParams.port)
         cursor = conn.cursor()
         cursor.callproc('registerinstrument', [idtype, instrumentid, storagecell,
                                                idarticul])  # пример вызова функции из БД , имя и параметр на вход
@@ -449,8 +542,8 @@ def registerInstrumentInWarehouse(idtype, instrumentid, storagecell, idarticul):
 def getUnregisteredFluteOnWarehouse():
     try:
         userRole = getRole(loginUser)
-        conn = psycopg2.connect(dbname='InstrumentalMusic', user=userRole,
-                                password='98106547', host='192.168.56.101', port='5432')
+        conn = psycopg2.connect(dbname=connectionParams.dbName, user=userRole,
+                                password='98106547', host=connectionParams.host, port=connectionParams.port)
         cursor = conn.cursor()
         cursor.callproc('unregisteredfluteinwarehouse', [])  # пример вызова функции из БД , имя и параметр на вход
         number = cursor.fetchall()
@@ -466,8 +559,8 @@ def getUnregisteredFluteOnWarehouse():
 def getEmptyCellOnFluteWarehouse():
     try:
         userRole = getRole(loginUser)
-        conn = psycopg2.connect(dbname='InstrumentalMusic', user=userRole,
-                                password='98106547', host='192.168.56.101', port='5432')
+        conn = psycopg2.connect(dbname=connectionParams.dbName, user=userRole,
+                                password='98106547', host=connectionParams.host, port=connectionParams.port)
         cursor = conn.cursor()
         cursor.callproc('emptycellonflutewarehouse', [])  # пример вызова функции из БД , имя и параметр на вход
         number = cursor.fetchall()
@@ -483,8 +576,8 @@ def getEmptyCellOnFluteWarehouse():
 def getUnregisteredGuitarOnWarehouse():
     try:
         userRole = getRole(loginUser)
-        conn = psycopg2.connect(dbname='InstrumentalMusic', user=userRole,
-                                password='98106547', host='192.168.56.101', port='5432')
+        conn = psycopg2.connect(dbname=connectionParams.dbName, user=userRole,
+                                password='98106547', host=connectionParams.host, port=connectionParams.port)
         cursor = conn.cursor()
         cursor.callproc('unregisteredguitarinwarehouse', [])  # пример вызова функции из БД , имя и параметр на вход
         number = cursor.fetchall()
@@ -500,8 +593,8 @@ def getUnregisteredGuitarOnWarehouse():
 def getEmptyCellOnGuitarWarehouse():
     try:
         userRole = getRole(loginUser)
-        conn = psycopg2.connect(dbname='InstrumentalMusic', user=userRole,
-                                password='98106547', host='192.168.56.101', port='5432')
+        conn = psycopg2.connect(dbname=connectionParams.dbName, user=userRole,
+                                password='98106547', host=connectionParams.host, port=connectionParams.port)
         cursor = conn.cursor()
         cursor.callproc('emptycellonguitarwarehouse', [])  # пример вызова функции из БД , имя и параметр на вход
         number = cursor.fetchall()
@@ -517,8 +610,8 @@ def getEmptyCellOnGuitarWarehouse():
 def getUnregisteredMicrophoneOnWarehouse():
     try:
         userRole = getRole(loginUser)
-        conn = psycopg2.connect(dbname='InstrumentalMusic', user=userRole,
-                                password='98106547', host='192.168.56.101', port='5432')
+        conn = psycopg2.connect(dbname=connectionParams.dbName, user=userRole,
+                                password='98106547', host=connectionParams.host, port=connectionParams.port)
         cursor = conn.cursor()
         cursor.callproc('unregisteredmicrophoneinwarehouse', [])  # пример вызова функции из БД , имя и параметр на вход
         number = cursor.fetchall()
@@ -534,8 +627,8 @@ def getUnregisteredMicrophoneOnWarehouse():
 def getEmptyCellOnMicrophoneWarehouse():
     try:
         userRole = getRole(loginUser)
-        conn = psycopg2.connect(dbname='InstrumentalMusic', user=userRole,
-                                password='98106547', host='192.168.56.101', port='5432')
+        conn = psycopg2.connect(dbname=connectionParams.dbName, user=userRole,
+                                password='98106547', host=connectionParams.host, port=connectionParams.port)
         cursor = conn.cursor()
         cursor.callproc('emptycellonmicrophonewarehouse', [])  # пример вызова функции из БД , имя и параметр на вход
         number = cursor.fetchall()
@@ -551,8 +644,8 @@ def getEmptyCellOnMicrophoneWarehouse():
 def getTypeInstrument():
     try:
         userRole = getRole(loginUser)
-        conn = psycopg2.connect(dbname='InstrumentalMusic', user=userRole,
-                                password='98106547', host='192.168.56.101', port='5432')
+        conn = psycopg2.connect(dbname=connectionParams.dbName, user=userRole,
+                                password='98106547', host=connectionParams.host, port=connectionParams.port)
         cursor = conn.cursor()
         cursor.callproc('gettypeinstrument', [])  # пример вызова функции из БД , имя и параметр на вход
         types = cursor.fetchall()
@@ -568,8 +661,8 @@ def getTypeInstrument():
 def getArticulInstrument():
     try:
         userRole = getRole(loginUser)
-        conn = psycopg2.connect(dbname='InstrumentalMusic', user=userRole,
-                                password='98106547', host='192.168.56.101', port='5432')
+        conn = psycopg2.connect(dbname=connectionParams.dbName, user=userRole,
+                                password='98106547', host=connectionParams.host, port=connectionParams.port)
         cursor = conn.cursor()
         cursor.callproc('getarticulinstrument', [])  # пример вызова функции из БД , имя и параметр на вход
         articul = cursor.fetchall()
@@ -585,8 +678,8 @@ def getArticulInstrument():
 def getParamInstrument():
     try:
         userRole = getRole(loginUser)
-        conn = psycopg2.connect(dbname='InstrumentalMusic', user=userRole,
-                                password='98106547', host='192.168.56.101', port='5432')
+        conn = psycopg2.connect(dbname=connectionParams.dbName, user=userRole,
+                                password='98106547', host=connectionParams.host, port=connectionParams.port)
         cursor = conn.cursor()
         cursor.callproc('getparamsinstrument', [])  # пример вызова функции из БД , имя и параметр на вход
         params = cursor.fetchall()
@@ -602,8 +695,8 @@ def getParamInstrument():
 def addArticul(idarticul, idtype, namearticul):
     try:
         userRole = getRole(loginUser)
-        conn = psycopg2.connect(dbname='InstrumentalMusic', user=userRole,
-                                password='98106547', host='192.168.56.101', port='5432')
+        conn = psycopg2.connect(dbname=connectionParams.dbName, user=userRole,
+                                password='98106547', host=connectionParams.host, port=connectionParams.port)
         cursor = conn.cursor()
         cursor.callproc('addarticul',
                         [idarticul, idtype, namearticul])  # пример вызова функции из БД , имя и параметр на вход
@@ -619,8 +712,8 @@ def addArticul(idarticul, idtype, namearticul):
 def getEmptyIdArticulInsturment():
     try:
         userRole = getRole(loginUser)
-        conn = psycopg2.connect(dbname='InstrumentalMusic', user=userRole,
-                                password='98106547', host='192.168.56.101', port='5432')
+        conn = psycopg2.connect(dbname=connectionParams.dbName, user=userRole,
+                                password='98106547', host=connectionParams.host, port=connectionParams.port)
         cursor = conn.cursor()
         cursor.callproc('getemptyarticulinstrument', [])  # пример вызова функции из БД , имя и параметр на вход
         number = cursor.fetchall()
@@ -636,8 +729,8 @@ def getEmptyIdArticulInsturment():
 def getAllArticulsName():  # системная
     articulsName = []
     try:
-        conn = psycopg2.connect(dbname='InstrumentalMusic', user="andrey",
-                                password='98106547', host='192.168.56.101', port='5432')
+        conn = psycopg2.connect(dbname=connectionParams.dbName, user="andrey",
+                                password='98106547', host=connectionParams.host, port=connectionParams.port)
         cursor = conn.cursor()
         cursor.callproc('getallarticuls', [])  # пример вызова функции из БД , имя и параметр на вход
         allarticuls = cursor.fetchall()
@@ -655,8 +748,8 @@ def getAllArticulsName():  # системная
 
 def findArticulFromName(nameArticul):  # системная
     try:
-        conn = psycopg2.connect(dbname='InstrumentalMusic', user="andrey",
-                                password='98106547', host='192.168.56.101', port='5432')
+        conn = psycopg2.connect(dbname=connectionParams.dbName, user="andrey",
+                                password='98106547', host=connectionParams.host, port=connectionParams.port)
         cursor = conn.cursor()
         cursor.callproc('findarticulfromname', [nameArticul])  # пример вызова функции из БД , имя и параметр на вход
         number = cursor.fetchall()
@@ -672,8 +765,8 @@ def findArticulFromName(nameArticul):  # системная
 def getAllTypes():  # системная
     typesName = []
     try:
-        conn = psycopg2.connect(dbname='InstrumentalMusic', user="andrey",
-                                password='98106547', host='192.168.56.101', port='5432')
+        conn = psycopg2.connect(dbname=connectionParams.dbName, user="andrey",
+                                password='98106547', host=connectionParams.host, port=connectionParams.port)
         cursor = conn.cursor()
         cursor.callproc('getlalltypes', [])  # пример вызова функции из БД , имя и параметр на вход
         alltypes = cursor.fetchall()
@@ -691,8 +784,8 @@ def getAllTypes():  # системная
 
 def findTypeFromName(typeName):
     try:
-        conn = psycopg2.connect(dbname='InstrumentalMusic', user="andrey",
-                                password='98106547', host='192.168.56.101', port='5432')
+        conn = psycopg2.connect(dbname=connectionParams.dbName, user="andrey",
+                                password='98106547', host=connectionParams.host, port=connectionParams.port)
         cursor = conn.cursor()
         cursor.callproc('findidtypefromname', [typeName])  # пример вызова функции из БД , имя и параметр на вход
         number = cursor.fetchall()
@@ -708,8 +801,8 @@ def findTypeFromName(typeName):
 def getAllRoles():
     allRoles = []
     try:
-        conn = psycopg2.connect(dbname='InstrumentalMusic', user="andrey",
-                                password='98106547', host='192.168.56.101', port='5432')
+        conn = psycopg2.connect(dbname=connectionParams.dbName, user="andrey",
+                                password='98106547', host=connectionParams.host, port=connectionParams.port)
         cursor = conn.cursor()
         cursor.callproc('getallroles', [])  # пример вызова функции из БД , имя и параметр на вход
         roles = cursor.fetchall()
@@ -727,8 +820,8 @@ def getAllRoles():
 def sellerAdd(name, family, telephone, email, login, password, role):
     userRole = getRole(loginUser)
     try:
-        conn = psycopg2.connect(dbname='InstrumentalMusic', user=userRole,
-                                password='98106547', host='192.168.56.101', port='5432')
+        conn = psycopg2.connect(dbname=connectionParams.dbName, user=userRole,
+                                password='98106547', host=connectionParams.host, port=connectionParams.port)
         cursor = conn.cursor()
         cursor.callproc('selleradd',
                         [name, family, telephone, email, login, password,
@@ -753,8 +846,8 @@ def selectSellerByEmail(email):
     userRole = getRole(loginUser)
     sellerList = []
     try:
-        conn = psycopg2.connect(dbname='InstrumentalMusic', user=userRole,
-                                password='98106547', host='192.168.56.101', port='5432')
+        conn = psycopg2.connect(dbname=connectionParams.dbName, user=userRole,
+                                password='98106547', host=connectionParams.host, port=connectionParams.port)
         cursor = conn.cursor()
         cursor.callproc('getsellerbyemail',
                         [email])  # пример вызова функции из БД , имя и параметр на вход
@@ -792,8 +885,8 @@ def selectSellerByEmail(email):
 def updateSeller(name, family, telephonenumber, email, login, password, role):
     userRole = getRole(loginUser)
     try:
-        conn = psycopg2.connect(dbname='InstrumentalMusic', user=userRole,
-                                password='98106547', host='192.168.56.101', port='5432')
+        conn = psycopg2.connect(dbname=connectionParams.dbName, user=userRole,
+                                password='98106547', host=connectionParams.host, port=connectionParams.port)
         cursor = conn.cursor()
         cursor.callproc('updateseller',
                         [name, family, telephonenumber, email, login, password,

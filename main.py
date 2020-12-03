@@ -173,21 +173,17 @@ def getIdClient(text, dateandtime):
 def getPianino(text):
     text.configure(state=NORMAL)
     text.delete(1.0, END)
-    try:
-        listInstrument = DBManage.getInstrumentFromWarehouse()
-        for instrument in listInstrument:
-            text.insert(END, str(instrument)
-                        .replace(")", "")
-                        .replace("(", "")
-                        .replace(",", "")
-                        .replace("                ", " ")
-                        .replace("              ", "")
-                        + '\n')
-        text.configure(state=DISABLED)
-    except TypeError:
-        tkinter.messagebox.showwarning(title="Внимание", message="Ошибка доступа")
-    except psycopg2.errors.InsufficientPrivilege:
-        tkinter.messagebox.showwarning(title="Внимание", message="Ошибка доступа")
+    listInstrument = DBManage.getInstrumentFromWarehouse()
+    for instrument in listInstrument:
+        text.insert(END, str(instrument)
+                    .replace(")", "")
+                    .replace("(", "")
+                    .replace(",", "")
+                    .replace("                ", " ")
+                    .replace("              ", "")
+                    .replace("            ", "")
+                    + '\n')
+    text.configure(state=DISABLED)
 
 
 def getDescriptionPiano(id, text):
@@ -200,7 +196,7 @@ def getDescriptionPiano(id, text):
     text.delete(1.0, END)
     try:
         description = DBManage.getDescriptionPiano(id)
-        params = DBManage.getPianoParams(id)
+        params = DBManage.getInstrumentParams(id)
         if description == False:
             tkinter.messagebox.showwarning(title="Внимание", message="Ошибка доступа")
             return False
@@ -240,11 +236,12 @@ def updateDescription(text, id):
 def aboutYou(text):
     actionAndrey = "Тебе доступны все возможности из всех вкладок!"
     actionClientDep = "Тебе доступны все возможности из вкладки <Клиенты>"
-    actionSellerPiano = "Тебе доступны все возможности из вкладки <Отдел пианино>"
+    actionSellerPiano = "Тебе доступны все возможности из вкладки <Инструменты>"
     actionGuest = "Тебе ничего не доступно, у тебя гостевая роль"
-    actionSellerFlute = "Тебе доступны все возможности из вкладки <Отдел флейт>"
+    actionSellerFlute = "Тебе доступны все возможности из вкладки <Инструменты>"
     actionsupplydep = "Тебе доступны все возможности из вкладки <Отдел поставки>"
     actionWarehouseDep = "Тебе доступны все возможности из вкладки <Склад>"
+    actionGuitarSeller = "Тебе доступны возможности из вкладки <Инструменты>"
     infoUser = DBManage.getInfoAboutYou(DBManage.loginUser)
     if infoUser[3] == "andrey":
         text.insert(END, "Приветствую!" + "\n" + "Имя: " + str(infoUser[0]) + "\n" +
@@ -274,6 +271,10 @@ def aboutYou(text):
         text.insert(END, "Приветствую!" + "\n" + "Имя: " + str(infoUser[0]) + "\n" +
                     "Фамилия: " + str(infoUser[1]) + "\n" + "Login: " + str(infoUser[2]) + "\n" +
                     "Роль аккаунта: " + infoUser[3] + "\n" + "Твои возможности: " + actionWarehouseDep)
+    elif infoUser[3] == "sellerguitar":
+        text.insert(END, "Приветствую!" + "\n" + "Имя: " + str(infoUser[0]) + "\n" +
+                    "Фамилия: " + str(infoUser[1]) + "\n" + "Login: " + str(infoUser[2]) + "\n" +
+                    "Роль аккаунта: " + infoUser[3] + "\n" + "Твои возможности: " + actionGuitarSeller)
     else:
         text.insert(END, "Внимание информация для твоей роли не назначена!")
     text.configure(state=DISABLED)
