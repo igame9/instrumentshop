@@ -228,6 +228,10 @@ def getInstrumentFromWarehouse():
             tkinter.messagebox.showerror(title="Ошибка", message="Ошибка подключения к БД")
             return False
 
+    else:
+        tkinter.messagebox.showinfo(title="Внимание", message="Действия для вашего отдела еще не назначены")
+        return False
+
 
 def getDescriptionPiano(id):
     userRole = getRole(loginUser)
@@ -301,47 +305,143 @@ def getDescriptionPiano(id):
             tkinter.messagebox.showerror(title="Ошибка", message="Неправомерный доступ")
             return False
 
+    else:
+        tkinter.messagebox.showinfo(title="Внимание", message="Дефствия для вашего отдела еще не назначены")
+        return False
+
 
 def addDescription(idd, text):
     userRole = getRole(loginUser)
     if userRole == 'sellerflute':
         userRole = 'seller_flute'
-    try:
-        conn = psycopg2.connect(dbname=connectionParams.dbName, user=userRole,
-                                password='98106547', host=connectionParams.host, port=connectionParams.port)
-        cursor = conn.cursor()
-        cursor.callproc('descriptionadd',
-                        [idd, text])  # пример вызова функции из БД , имя и параметр на вход
-        cursor.close()
-        conn.commit()
-        conn.close()
-    except (psycopg2.OperationalError, psycopg2.errors.InvalidTextRepresentation, psycopg2.errors.UniqueViolation):
-        tkinter.messagebox.showerror(title="Ошибка",
-                                     message="Ошибка подключения к БД, возможно описание с таким ключом уже есть")
+        try:
+            conn = psycopg2.connect(dbname=connectionParams.dbName, user=userRole,
+                                    password='98106547', host=connectionParams.host, port=connectionParams.port)
+            cursor = conn.cursor()
+            cursor.callproc('descriptionaddflute',
+                            [idd, text])  # пример вызова функции из БД , имя и параметр на вход
+            cursor.close()
+            conn.commit()
+            conn.close()
+        except (psycopg2.OperationalError, psycopg2.errors.InvalidTextRepresentation, psycopg2.errors.UniqueViolation):
+            tkinter.messagebox.showerror(title="Ошибка",
+                                         message="Ошибка подключения к БД, возможно описание с таким ключом уже есть")
+            return False
+        except psycopg2.errors.RaiseException:
+            tkinter.messagebox.showerror(title="Ошибка", message="Неправомерный доступ")
+            return False
+        tkinter.messagebox.showinfo(title="Успех", message="Описание успешно добавлено в базу")
+        return True
+
+    elif userRole == 'sellerguitar':
+        try:
+            conn = psycopg2.connect(dbname=connectionParams.dbName, user=userRole,
+                                    password='98106547', host=connectionParams.host, port=connectionParams.port)
+            cursor = conn.cursor()
+            cursor.callproc('descriptionaddguitar',
+                            [idd, text])  # пример вызова функции из БД , имя и параметр на вход
+            cursor.close()
+            conn.commit()
+            conn.close()
+        except (psycopg2.OperationalError, psycopg2.errors.InvalidTextRepresentation, psycopg2.errors.UniqueViolation):
+            tkinter.messagebox.showerror(title="Ошибка",
+                                         message="Ошибка подключения к БД, возможно описание с таким ключом уже есть")
+            return False
+        except psycopg2.errors.RaiseException:
+            tkinter.messagebox.showerror(title="Ошибка", message="Неправомерный доступ")
+            return False
+        tkinter.messagebox.showinfo(title="Успех", message="Описание успешно добавлено в базу")
+        return True
+
+    elif userRole == 'sellerpiano':
+        try:
+            conn = psycopg2.connect(dbname=connectionParams.dbName, user=userRole,
+                                    password='98106547', host=connectionParams.host, port=connectionParams.port)
+            cursor = conn.cursor()
+            cursor.callproc('descriptionaddpiano',
+                            [idd, text])  # пример вызова функции из БД , имя и параметр на вход
+            cursor.close()
+            conn.commit()
+            conn.close()
+        except (psycopg2.OperationalError, psycopg2.errors.InvalidTextRepresentation, psycopg2.errors.UniqueViolation):
+            tkinter.messagebox.showerror(title="Ошибка",
+                                         message="Ошибка подключения к БД, возможно описание с таким ключом уже есть")
+            return False
+        except psycopg2.errors.RaiseException:
+            tkinter.messagebox.showerror(title="Ошибка", message="Неправомерный доступ")
+            return False
+        tkinter.messagebox.showinfo(title="Успех", message="Описание успешно добавлено в базу")
+        return True
+
+    else:
+        tkinter.messagebox.showinfo(title="Внимание", message="Действия для вашего отдела еще не назначены")
         return False
-    tkinter.messagebox.showinfo(title="Успех", message="Описание успешно добавлено в базу")
-    return True
 
 
 def updateDescription(text, id):
     userRole = getRole(loginUser)
     if userRole == 'sellerflute':
         userRole = 'seller_flute'
-    try:
-        conn = psycopg2.connect(dbname=connectionParams.dbName, user=userRole,
-                                password='98106547', host=connectionParams.host, port=connectionParams.port)
-        cursor = conn.cursor()
-        cursor.callproc('updatedescription',
-                        [text, id])  # пример вызова функции из БД , имя и параметр на вход
-        cursor.close()
-        conn.commit()
-        conn.close()
-    except (psycopg2.OperationalError, psycopg2.errors.InvalidTextRepresentation, psycopg2.errors.UniqueViolation):
-        tkinter.messagebox.showerror(title="Ошибка",
-                                     message="Ошибка подключения к БД")
+        try:
+            conn = psycopg2.connect(dbname=connectionParams.dbName, user=userRole,
+                                    password='98106547', host=connectionParams.host, port=connectionParams.port)
+            cursor = conn.cursor()
+            cursor.callproc('updatedescriptionflute',
+                            [text, id])  # пример вызова функции из БД , имя и параметр на вход
+            cursor.close()
+            conn.commit()
+            conn.close()
+        except (psycopg2.OperationalError, psycopg2.errors.InvalidTextRepresentation, psycopg2.errors.UniqueViolation):
+            tkinter.messagebox.showerror(title="Ошибка",
+                                         message="Ошибка подключения к БД")
+            return False
+        except psycopg2.errors.RaiseException:
+            tkinter.messagebox.showerror(title="Ошибка", message="Неправомерный доступ")
+            return False
+        tkinter.messagebox.showinfo(title="Успех", message="Описание успешно обновлено")
+        return True
+
+    elif userRole == 'sellerguitar':
+        try:
+            conn = psycopg2.connect(dbname=connectionParams.dbName, user=userRole,
+                                    password='98106547', host=connectionParams.host, port=connectionParams.port)
+            cursor = conn.cursor()
+            cursor.callproc('updatedescriptionguitar',
+                            [text, id])  # пример вызова функции из БД , имя и параметр на вход
+            cursor.close()
+            conn.commit()
+            conn.close()
+        except (psycopg2.OperationalError, psycopg2.errors.InvalidTextRepresentation, psycopg2.errors.UniqueViolation):
+            tkinter.messagebox.showerror(title="Ошибка",
+                                         message="Ошибка подключения к БД")
+            return False
+        except psycopg2.errors.RaiseException:
+            tkinter.messagebox.showerror(title="Ошибка", message="Неправомерный доступ")
+            return False
+        tkinter.messagebox.showinfo(title="Успех", message="Описание успешно обновлено")
+        return True
+    elif userRole == 'sellerpiano':
+        try:
+            conn = psycopg2.connect(dbname=connectionParams.dbName, user=userRole,
+                                    password='98106547', host=connectionParams.host, port=connectionParams.port)
+            cursor = conn.cursor()
+            cursor.callproc('updatedescriptionpiano',
+                            [text, id])  # пример вызова функции из БД , имя и параметр на вход
+            cursor.close()
+            conn.commit()
+            conn.close()
+        except (psycopg2.OperationalError, psycopg2.errors.InvalidTextRepresentation, psycopg2.errors.UniqueViolation):
+            tkinter.messagebox.showerror(title="Ошибка",
+                                         message="Ошибка подключения к БД")
+            return False
+        except psycopg2.errors.RaiseException:
+            tkinter.messagebox.showerror(title="Ошибка", message="Неправомерный доступ")
+            return False
+        tkinter.messagebox.showinfo(title="Успех", message="Описание успешно обновлено")
+        return True
+    else:
+        tkinter.messagebox.showinfo(title="Внимание", message="Действия для вашего отдела еще не назначены")
         return False
-    tkinter.messagebox.showinfo(title="Успех", message="Описание успешно обновлено")
-    return True
 
 
 def getInstrumentParams(id):
